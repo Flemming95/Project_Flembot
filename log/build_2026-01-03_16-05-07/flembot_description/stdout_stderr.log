@@ -17,7 +17,7 @@
 -- Build files have been written to: /home/vboxuser/ros2_ws/build/flembot_description
 -- Install configuration: ""
 -- Installing: /home/vboxuser/ros2_ws/install/flembot_description/share/flembot_description/urdf
--- Installing: /home/vboxuser/ros2_ws/install/flembot_description/share/flembot_description/urdf/flembot.urdf.xarco
+-- Installing: /home/vboxuser/ros2_ws/install/flembot_description/share/flembot_description/urdf/flembot.urdf.xacro
 -- Installing: /home/vboxuser/ros2_ws/install/flembot_description/share/flembot_description/meshes
 -- Installing: /home/vboxuser/ros2_ws/install/flembot_description/share/ament_index/resource_index/package_run_dependencies/flembot_description
 -- Installing: /home/vboxuser/ros2_ws/install/flembot_description/share/ament_index/resource_index/parent_prefix_path/flembot_description
