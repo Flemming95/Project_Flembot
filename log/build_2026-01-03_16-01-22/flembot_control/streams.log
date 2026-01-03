@@ -1,0 +1,37 @@
+[0.590s] Invoking command in '/home/vboxuser/ros2_ws/src/flembot_control': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/vboxuser/ros2_ws/build/flembot_control/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/vboxuser/ros2_ws/install/flembot_control/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/flembot_control build --build-base /home/vboxuser/ros2_ws/build/flembot_control/build install --record /home/vboxuser/ros2_ws/build/flembot_control/install.log --single-version-externally-managed install_data
+[0.802s] running egg_info
+[0.802s] creating ../../build/flembot_control/flembot_control.egg-info
+[0.808s] writing ../../build/flembot_control/flembot_control.egg-info/PKG-INFO
+[0.808s] writing dependency_links to ../../build/flembot_control/flembot_control.egg-info/dependency_links.txt
+[0.809s] writing entry points to ../../build/flembot_control/flembot_control.egg-info/entry_points.txt
+[0.809s] writing requirements to ../../build/flembot_control/flembot_control.egg-info/requires.txt
+[0.809s] writing top-level names to ../../build/flembot_control/flembot_control.egg-info/top_level.txt
+[0.809s] writing manifest file '../../build/flembot_control/flembot_control.egg-info/SOURCES.txt'
+[0.824s] reading manifest file '../../build/flembot_control/flembot_control.egg-info/SOURCES.txt'
+[0.826s] writing manifest file '../../build/flembot_control/flembot_control.egg-info/SOURCES.txt'
+[0.826s] running build
+[0.826s] running build_py
+[0.826s] creating /home/vboxuser/ros2_ws/build/flembot_control/build
+[0.826s] creating /home/vboxuser/ros2_ws/build/flembot_control/build/lib
+[0.826s] creating /home/vboxuser/ros2_ws/build/flembot_control/build/lib/flembot_control
+[0.826s] copying flembot_control/teleop.py -> /home/vboxuser/ros2_ws/build/flembot_control/build/lib/flembot_control
+[0.829s] copying flembot_control/__init__.py -> /home/vboxuser/ros2_ws/build/flembot_control/build/lib/flembot_control
+[0.829s] running install
+[0.831s] running install_lib
+[0.840s] creating /home/vboxuser/ros2_ws/install/flembot_control/lib/python3.12/site-packages/flembot_control
+[0.840s] copying /home/vboxuser/ros2_ws/build/flembot_control/build/lib/flembot_control/teleop.py -> /home/vboxuser/ros2_ws/install/flembot_control/lib/python3.12/site-packages/flembot_control
+[0.840s] copying /home/vboxuser/ros2_ws/build/flembot_control/build/lib/flembot_control/__init__.py -> /home/vboxuser/ros2_ws/install/flembot_control/lib/python3.12/site-packages/flembot_control
+[0.841s] byte-compiling /home/vboxuser/ros2_ws/install/flembot_control/lib/python3.12/site-packages/flembot_control/teleop.py to teleop.cpython-312.pyc
+[0.841s] byte-compiling /home/vboxuser/ros2_ws/install/flembot_control/lib/python3.12/site-packages/flembot_control/__init__.py to __init__.cpython-312.pyc
+[0.841s] running install_data
+[0.842s] creating /home/vboxuser/ros2_ws/install/flembot_control/share/ament_index
+[0.842s] creating /home/vboxuser/ros2_ws/install/flembot_control/share/ament_index/resource_index
+[0.842s] creating /home/vboxuser/ros2_ws/install/flembot_control/share/ament_index/resource_index/packages
+[0.842s] copying resource/flembot_control -> /home/vboxuser/ros2_ws/install/flembot_control/share/ament_index/resource_index/packages
+[0.842s] copying package.xml -> /home/vboxuser/ros2_ws/install/flembot_control/share/flembot_control
+[0.842s] running install_egg_info
+[0.851s] Copying ../../build/flembot_control/flembot_control.egg-info to /home/vboxuser/ros2_ws/install/flembot_control/lib/python3.12/site-packages/flembot_control-0.0.0-py3.12.egg-info
+[0.851s] running install_scripts
+[0.913s] Installing teleop script to /home/vboxuser/ros2_ws/install/flembot_control/lib/flembot_control
+[0.914s] writing list of installed files to '/home/vboxuser/ros2_ws/build/flembot_control/install.log'
+[0.930s] Invoked command in '/home/vboxuser/ros2_ws/src/flembot_control' returned '0': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/vboxuser/ros2_ws/build/flembot_control/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/vboxuser/ros2_ws/install/flembot_control/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/flembot_control build --build-base /home/vboxuser/ros2_ws/build/flembot_control/build install --record /home/vboxuser/ros2_ws/build/flembot_control/install.log --single-version-externally-managed install_data

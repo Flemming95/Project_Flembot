@@ -37,7 +37,8 @@ def generate_launch_description():
 
         # --- Robot description ---
         description_pkg = get_package_share_directory('flembot_description')
-        xacro_file = os.path.join(description_pkg, 'urdf', 'my_robot.urdf.xacro')
+        # Use flembot_ naming
+        xacro_file = os.path.join(description_pkg, 'urdf', 'flembot.urdf.xacro')
         robot_description_config = xacro.process_file(xacro_file)
 
         robot_state_publisher = Node(
@@ -77,4 +78,3 @@ def generate_launch_description():
         declare_world_cmd,
         OpaqueFunction(function=resolve_world)
     ])
-
