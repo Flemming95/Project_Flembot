@@ -1,0 +1,25 @@
+[0.736s] Invoking command in '/home/vboxuser/ros2_ws/build/flembot_bringup': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/vboxuser/ros2_ws/build/flembot_bringup/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/vboxuser/ros2_ws/install/flembot_bringup/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/vboxuser/ros2_ws/build/flembot_bringup/build --no-deps symlink_data
+[0.994s] running develop
+[1.068s] running egg_info
+[1.068s] creating flembot_bringup.egg-info
+[1.074s] writing flembot_bringup.egg-info/PKG-INFO
+[1.074s] writing dependency_links to flembot_bringup.egg-info/dependency_links.txt
+[1.074s] writing requirements to flembot_bringup.egg-info/requires.txt
+[1.074s] writing top-level names to flembot_bringup.egg-info/top_level.txt
+[1.074s] writing manifest file 'flembot_bringup.egg-info/SOURCES.txt'
+[1.081s] reading manifest file 'flembot_bringup.egg-info/SOURCES.txt'
+[1.082s] writing manifest file 'flembot_bringup.egg-info/SOURCES.txt'
+[1.094s] running build_ext
+[1.106s] Creating /home/vboxuser/ros2_ws/install/flembot_bringup/lib/python3.12/site-packages/flembot-bringup.egg-link (link to .)
+[1.106s] 
+[1.106s] Installed /home/vboxuser/ros2_ws/build/flembot_bringup
+[1.106s] running symlink_data
+[1.106s] creating /home/vboxuser/ros2_ws/install/flembot_bringup/share/ament_index
+[1.106s] creating /home/vboxuser/ros2_ws/install/flembot_bringup/share/ament_index/resource_index
+[1.106s] creating /home/vboxuser/ros2_ws/install/flembot_bringup/share/ament_index/resource_index/packages
+[1.106s] symbolically linking /home/vboxuser/ros2_ws/build/flembot_bringup/resource/flembot_bringup -> /home/vboxuser/ros2_ws/install/flembot_bringup/share/ament_index/resource_index/packages
+[1.107s] symbolically linking /home/vboxuser/ros2_ws/build/flembot_bringup/package.xml -> /home/vboxuser/ros2_ws/install/flembot_bringup/share/flembot_bringup
+[1.107s] creating /home/vboxuser/ros2_ws/install/flembot_bringup/share/flembot_bringup/launch
+[1.107s] symbolically linking /home/vboxuser/ros2_ws/build/flembot_bringup/launch/sim.launch.py -> /home/vboxuser/ros2_ws/install/flembot_bringup/share/flembot_bringup/launch
+[1.108s] creating /home/vboxuser/ros2_ws/install/flembot_bringup/share/flembot_bringup/worlds
+[1.128s] Invoked command in '/home/vboxuser/ros2_ws/build/flembot_bringup' returned '0': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/vboxuser/ros2_ws/build/flembot_bringup/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/vboxuser/ros2_ws/install/flembot_bringup/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/vboxuser/ros2_ws/build/flembot_bringup/build --no-deps symlink_data
