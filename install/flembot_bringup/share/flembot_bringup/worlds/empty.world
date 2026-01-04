@@ -1,17 +1,1 @@
-<?xml version="1.0" ?>
-<sdf version="1.6">
-  <world name="empty_world">
-
-    <!-- Basic lighting -->
-    <include>
-      <uri>model://sun</uri>
-    </include>
-
-    <!-- Ground plane -->
-    <include>
-      <uri>model://ground_plane</uri>
-    </include>
-
-  </world>
-</sdf>
-
+/home/vboxuser/ros2_ws/build/flembot_bringup/worlds/empty.world
