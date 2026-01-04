@@ -1,0 +1,25 @@
+# Configuration for ros_gz_sim bridge and simulator behavior.
+# Edit these values to customize how ros_gz_sim is launched.
+#
+# This example includes a minimal bridge configuration and placeholders
+# for other ros_gz_sim options. Consult ros_gz_sim launch file docs
+# for full option names and semantics.
+
+bridge:
+  # name of the bridge node used by ros_gz_bridge/ros_gz_bridge
+  name: bridge
+
+# Example: transport and QoS settings (placeholder)
+transport:
+  # 'ros2' is commonly used for ros_gz_bridge
+  type: ros2
+
+# physics / world settings (placeholders)
+physics:
+  max_step_size: 0.001
+  real_time_update_rate: 1000
+
+# Additional parameters can be added here to match the
+# DeclareLaunchArgument names expected by the ros_gz_sim launch.
+# For example, if the launch expects `sdf_path` or `sdf_model`,
+# add them here and then pass the appropriate launch-argument name.

@@ -1,7 +1,7 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, OpaqueFunction, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, OpaqueFunction, IncludeLaunchDescription, ExecuteProcess
+from launch.substitutions import LaunchConfiguration
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.actions import ExecuteProcess
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory, PackageNotFoundError
 import xacro
@@ -83,11 +83,10 @@ def generate_launch_description():
         description='Name of the world to load (e.g., empty, custom)'
     )
 
-    world_arg = LaunchConfiguration = 'world'  # used only for clarity below
+    world_arg = LaunchConfiguration('world')
 
     def resolve_world(context, *args, **kwargs):
-        # get world argument value
-        world_name = context.launch_configurations.get('world', 'empty')
+        world_name = world_arg.perform(context)
         bringup_pkg = get_package_share_directory('flembot_bringup')
 
         if world_name not in WORLD_MAPPING:
@@ -95,7 +94,7 @@ def generate_launch_description():
 
         world_file = os.path.join(bringup_pkg, 'worlds', WORLD_MAPPING[world_name])
 
-        # Robot description
+        # --- Robot description ---
         description_pkg = get_package_share_directory('flembot_description')
         xacro_file = os.path.join(description_pkg, 'urdf', 'flembot.urdf.xacro')
         robot_description_config = xacro.process_file(xacro_file)
@@ -108,7 +107,7 @@ def generate_launch_description():
             }]
         )
 
-        # Simulator include: prefer ros_gz_sim/ros_gz/gz, fallback to gazebo_ros
+        # --- Simulator include: prefer ros_gz_sim/ros_gz/gz, fallback to gazebo_ros ---
         sim_pkg, sim_launch = find_package_with_file(SIM_PKG_CANDIDATES, LAUNCH_FILE_CANDIDATES)
         if sim_pkg is None or sim_launch is None:
             raise RuntimeError(
@@ -116,24 +115,32 @@ def generate_launch_description():
                 f"{SIM_PKG_CANDIDATES} is installed and provides a launch file."
             )
 
+        # Prepare launch arguments. If a repo config exists in package share, pass it as config_file.
+        launch_args = {'world': world_file}
+
+        # repo-installed config path (installed under share/flembot_bringup/config/...)
+        repo_cfg_path = os.path.join(get_package_share_directory('flembot_bringup'), 'config', 'ros_gz_config.yaml')
+        if sim_pkg and sim_pkg.startswith('ros_gz'):
+            # pass bridge_name and config_file if available
+            launch_args['bridge_name'] = 'bridge'
+            if os.path.exists(repo_cfg_path):
+                launch_args['config_file'] = repo_cfg_path
+
         sim_include = IncludeLaunchDescription(
             PythonLaunchDescriptionSource(sim_launch),
-            launch_arguments={'world': world_file}.items(),
+            launch_arguments=launch_args.items(),
         )
 
-        # Try to find a spawn launch (ros_gz_sim provides gz_spawn_model.launch)
+        # --- Spawn robot: try to find a spawn launch (ros_gz_sim provides gz_spawn_model.launch) ---
         spawn_pkg, spawn_launch = find_spawn_launch(SIM_PKG_CANDIDATES, SPAWN_LAUNCH_CANDIDATES)
         spawn_action = None
 
         if spawn_launch:
-            # Many ros_gz_sim spawn launch files accept 'topic' and 'entity' or 'name' arguments;
-            # try common names. We'll pass 'topic' and 'entity' which matches the legacy behaviour.
             spawn_action = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(spawn_launch),
                 launch_arguments={'topic': 'robot_description', 'entity': 'flembot'}.items()
             )
         else:
-            # As a fallback, try to find a spawn script file anywhere (e.g., spawn_entity.py)
             spawn_pkg_script, spawn_script = find_spawn_script(SIM_PKG_CANDIDATES, SPAWN_SCRIPT_BASENAMES)
             if spawn_script:
                 if spawn_script.endswith('.py'):
@@ -147,7 +154,6 @@ def generate_launch_description():
                         output='screen'
                     )
             else:
-                # Last resort: try legacy gazebo_ros spawn executable as a Node (if gazebo_ros installed)
                 try:
                     _ = get_package_share_directory('gazebo_ros')
                     spawn_action = Node(
@@ -164,7 +170,6 @@ def generate_launch_description():
 
         return [sim_include, robot_state_publisher, spawn_action]
 
-    # Return LaunchDescription with OpaqueFunction so we can resolve runtime package locations
     from launch.actions import OpaqueFunction
     return LaunchDescription([
         declare_world_cmd,

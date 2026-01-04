@@ -1,0 +1,22 @@
+[0.374s] Invoking command in '/home/vboxuser/ros2_ws/build/flembot_description': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/vboxuser/ros2_ws/build/flembot_description -- -j4 -l4
+[0.423s] Invoked command in '/home/vboxuser/ros2_ws/build/flembot_description' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/vboxuser/ros2_ws/build/flembot_description -- -j4 -l4
+[0.434s] Invoking command in '/home/vboxuser/ros2_ws/build/flembot_description': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --install /home/vboxuser/ros2_ws/build/flembot_description
+[0.443s] -- Install configuration: ""
+[0.444s] -- Execute custom install script
+[0.444s] -- Up-to-date symlink: /home/vboxuser/ros2_ws/install/flembot_description/share/flembot_description/urdf/flembot.urdf.xacro
+[0.444s] -- Up-to-date symlink: /home/vboxuser/ros2_ws/install/flembot_description/share/ament_index/resource_index/package_run_dependencies/flembot_description
+[0.444s] -- Up-to-date symlink: /home/vboxuser/ros2_ws/install/flembot_description/share/ament_index/resource_index/parent_prefix_path/flembot_description
+[0.444s] -- Up-to-date symlink: /home/vboxuser/ros2_ws/install/flembot_description/share/flembot_description/environment/ament_prefix_path.sh
+[0.444s] -- Up-to-date symlink: /home/vboxuser/ros2_ws/install/flembot_description/share/flembot_description/environment/ament_prefix_path.dsv
+[0.445s] -- Up-to-date symlink: /home/vboxuser/ros2_ws/install/flembot_description/share/flembot_description/environment/path.sh
+[0.445s] -- Up-to-date symlink: /home/vboxuser/ros2_ws/install/flembot_description/share/flembot_description/environment/path.dsv
+[0.445s] -- Up-to-date symlink: /home/vboxuser/ros2_ws/install/flembot_description/share/flembot_description/local_setup.bash
+[0.445s] -- Up-to-date symlink: /home/vboxuser/ros2_ws/install/flembot_description/share/flembot_description/local_setup.sh
+[0.445s] -- Up-to-date symlink: /home/vboxuser/ros2_ws/install/flembot_description/share/flembot_description/local_setup.zsh
+[0.445s] -- Up-to-date symlink: /home/vboxuser/ros2_ws/install/flembot_description/share/flembot_description/local_setup.dsv
+[0.445s] -- Symlinking: /home/vboxuser/ros2_ws/install/flembot_description/share/flembot_description/package.dsv
+[0.456s] -- Up-to-date symlink: /home/vboxuser/ros2_ws/install/flembot_description/share/ament_index/resource_index/packages/flembot_description
+[0.456s] -- Up-to-date symlink: /home/vboxuser/ros2_ws/install/flembot_description/share/flembot_description/cmake/flembot_descriptionConfig.cmake
+[0.456s] -- Up-to-date symlink: /home/vboxuser/ros2_ws/install/flembot_description/share/flembot_description/cmake/flembot_descriptionConfig-version.cmake
+[0.456s] -- Up-to-date symlink: /home/vboxuser/ros2_ws/install/flembot_description/share/flembot_description/package.xml
+[0.460s] Invoked command in '/home/vboxuser/ros2_ws/build/flembot_description' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --install /home/vboxuser/ros2_ws/build/flembot_description
