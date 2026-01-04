@@ -6,6 +6,7 @@ from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory, PackageNotFoundError
 import xacro
 import os
+import tempfile
 
 # --- Mapping from simple name to file ---
 WORLD_MAPPING = {
@@ -13,25 +14,21 @@ WORLD_MAPPING = {
     'custom': 'custom_world.world',  # Add more worlds here
 }
 
-# Search candidates: include ros_gz_sim (new), ros_gz, gz, and legacy gazebo_ros
 SIM_PKG_CANDIDATES = ['ros_gz_sim', 'ros_gz', 'gz', 'gazebo_ros']
-# Common simulator launch files to try (prioritise ros_gz_sim names)
 LAUNCH_FILE_CANDIDATES = [
     'launch/ros_gz_sim.launch.py',
     'launch/gz_sim.launch.py',
     'launch/gz_server.launch.py',
     'launch/gz.launch.py',
-    'launch/gazebo.launch.py',       # legacy gazebo_ros
-    'launch/gazebo.launch'           # fallback
+    'launch/gazebo.launch.py',
+    'launch/gazebo.launch'
 ]
-# Spawn-launch candidates (ros_gz_sim provides gz_spawn_model / ros_gz_spawn_model)
 SPAWN_LAUNCH_CANDIDATES = [
     'launch/gz_spawn_model.launch.py',
     'launch/ros_gz_spawn_model.launch.py',
     'launch/gz_spawn_model.launch',
     'launch/ros_gz_spawn_model.launch'
 ]
-# Spawn script/file basenames as last-ditch attempt
 SPAWN_SCRIPT_BASENAMES = [
     'spawn_entity.py', 'spawn_entity', 'gz_spawn_model', 'ros_gz_spawn_model'
 ]
@@ -76,6 +73,35 @@ def find_spawn_script(pkg_names, basenames):
     return None, None
 
 
+def _locate_repo_config():
+    """
+    Return a path to a ros_gz config file with the following preference:
+      1) installed package share: <share/flembot_bringup>/config/ros_gz_config.yaml
+      2) workspace source path: <cwd>/src/flembot_bringup/config/ros_gz_config.yaml
+      3) create a small temp file and return its path
+    """
+    # 1) installed package share
+    try:
+        share = get_package_share_directory('flembot_bringup')
+        installed_path = os.path.join(share, 'config', 'ros_gz_config.yaml')
+        if os.path.exists(installed_path):
+            return installed_path
+    except PackageNotFoundError:
+        installed_path = None
+
+    # 2) workspace source path (helpful during development before colcon install)
+    src_path = os.path.join(os.getcwd(), 'src', 'flembot_bringup', 'config', 'ros_gz_config.yaml')
+    if os.path.exists(src_path):
+        return src_path
+
+    # 3) create tiny temp file to satisfy the included launch's requirement
+    tmp = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.yaml', prefix='ros_gz_cfg_')
+    tmp.write('# auto-generated minimal ros_gz config\n')
+    tmp.flush()
+    tmp.close()
+    return tmp.name
+
+
 def generate_launch_description():
     declare_world_cmd = DeclareLaunchArgument(
         'world',
@@ -87,14 +113,26 @@ def generate_launch_description():
 
     def resolve_world(context, *args, **kwargs):
         world_name = world_arg.perform(context)
-        bringup_pkg = get_package_share_directory('flembot_bringup')
+        bringup_pkg = None
+        try:
+            bringup_pkg = get_package_share_directory('flembot_bringup')
+        except PackageNotFoundError:
+            # it's okay; we'll still attempt to use workspace src path for config
+            pass
 
         if world_name not in WORLD_MAPPING:
             raise RuntimeError(f"Unknown world '{world_name}'. Available: {list(WORLD_MAPPING.keys())}")
 
-        world_file = os.path.join(bringup_pkg, 'worlds', WORLD_MAPPING[world_name])
+        world_file = None
+        if bringup_pkg:
+            world_file = os.path.join(bringup_pkg, 'worlds', WORLD_MAPPING[world_name])
+        else:
+            # fallback to workspace src
+            world_file = os.path.join(os.getcwd(), 'src', 'flembot_bringup', 'worlds', WORLD_MAPPING[world_name])
+        if not os.path.exists(world_file):
+            raise RuntimeError(f"World file not found: {world_file}")
 
-        # --- Robot description ---
+        # Robot description
         description_pkg = get_package_share_directory('flembot_description')
         xacro_file = os.path.join(description_pkg, 'urdf', 'flembot.urdf.xacro')
         robot_description_config = xacro.process_file(xacro_file)
@@ -107,7 +145,7 @@ def generate_launch_description():
             }]
         )
 
-        # --- Simulator include: prefer ros_gz_sim/ros_gz/gz, fallback to gazebo_ros ---
+        # Simulator include
         sim_pkg, sim_launch = find_package_with_file(SIM_PKG_CANDIDATES, LAUNCH_FILE_CANDIDATES)
         if sim_pkg is None or sim_launch is None:
             raise RuntimeError(
@@ -115,23 +153,19 @@ def generate_launch_description():
                 f"{SIM_PKG_CANDIDATES} is installed and provides a launch file."
             )
 
-        # Prepare launch arguments. If a repo config exists in package share, pass it as config_file.
+        # Prepare launch args and supply config_file if requested by ros_gz-style launches
         launch_args = {'world': world_file}
-
-        # repo-installed config path (installed under share/flembot_bringup/config/...)
-        repo_cfg_path = os.path.join(get_package_share_directory('flembot_bringup'), 'config', 'ros_gz_config.yaml')
-        if sim_pkg and sim_pkg.startswith('ros_gz'):
-            # pass bridge_name and config_file if available
+        if sim_pkg and (sim_pkg.startswith('ros_gz') or sim_pkg == 'ros_gz_sim'):
             launch_args['bridge_name'] = 'bridge'
-            if os.path.exists(repo_cfg_path):
-                launch_args['config_file'] = repo_cfg_path
+            cfg_path = _locate_repo_config()
+            launch_args['config_file'] = cfg_path
 
         sim_include = IncludeLaunchDescription(
             PythonLaunchDescriptionSource(sim_launch),
             launch_arguments=launch_args.items(),
         )
 
-        # --- Spawn robot: try to find a spawn launch (ros_gz_sim provides gz_spawn_model.launch) ---
+        # Spawn robot
         spawn_pkg, spawn_launch = find_spawn_launch(SIM_PKG_CANDIDATES, SPAWN_LAUNCH_CANDIDATES)
         spawn_action = None
 
