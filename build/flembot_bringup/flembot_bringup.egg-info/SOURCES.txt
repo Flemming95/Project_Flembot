@@ -7,8 +7,11 @@ setup.py
 ../../build/flembot_bringup/flembot_bringup.egg-info/requires.txt
 ../../build/flembot_bringup/flembot_bringup.egg-info/top_level.txt
 ../../build/flembot_bringup/flembot_bringup.egg-info/zip-safe
+config/ros_gz_config.yaml
+flembot_bringup/__init__.py
 launch/sim.launch.py
 resource/flembot_bringup
 test/test_copyright.py
 test/test_flake8.py
 test/test_pep257.py
+worlds/empty.world

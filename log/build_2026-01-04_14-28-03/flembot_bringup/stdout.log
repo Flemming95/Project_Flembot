@@ -1,0 +1,27 @@
+running egg_info
+writing ../../build/flembot_bringup/flembot_bringup.egg-info/PKG-INFO
+writing dependency_links to ../../build/flembot_bringup/flembot_bringup.egg-info/dependency_links.txt
+writing requirements to ../../build/flembot_bringup/flembot_bringup.egg-info/requires.txt
+writing top-level names to ../../build/flembot_bringup/flembot_bringup.egg-info/top_level.txt
+reading manifest file '../../build/flembot_bringup/flembot_bringup.egg-info/SOURCES.txt'
+writing manifest file '../../build/flembot_bringup/flembot_bringup.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/vboxuser/ros2_ws/build/flembot_bringup/build
+creating /home/vboxuser/ros2_ws/build/flembot_bringup/build/lib
+creating /home/vboxuser/ros2_ws/build/flembot_bringup/build/lib/flembot_bringup
+copying flembot_bringup/__init__.py -> /home/vboxuser/ros2_ws/build/flembot_bringup/build/lib/flembot_bringup
+running install
+running install_lib
+creating /home/vboxuser/ros2_ws/install/flembot_bringup/lib/python3.12/site-packages/flembot_bringup
+copying /home/vboxuser/ros2_ws/build/flembot_bringup/build/lib/flembot_bringup/__init__.py -> /home/vboxuser/ros2_ws/install/flembot_bringup/lib/python3.12/site-packages/flembot_bringup
+byte-compiling /home/vboxuser/ros2_ws/install/flembot_bringup/lib/python3.12/site-packages/flembot_bringup/__init__.py to __init__.cpython-312.pyc
+running install_data
+copying worlds/empty.world -> /home/vboxuser/ros2_ws/install/flembot_bringup/share/flembot_bringup/worlds
+creating /home/vboxuser/ros2_ws/install/flembot_bringup/share/flembot_bringup/config
+copying config/ros_gz_config.yaml -> /home/vboxuser/ros2_ws/install/flembot_bringup/share/flembot_bringup/config
+running install_egg_info
+removing '/home/vboxuser/ros2_ws/install/flembot_bringup/lib/python3.12/site-packages/flembot_bringup-0.0.0-py3.12.egg-info' (and everything under it)
+Copying ../../build/flembot_bringup/flembot_bringup.egg-info to /home/vboxuser/ros2_ws/install/flembot_bringup/lib/python3.12/site-packages/flembot_bringup-0.0.0-py3.12.egg-info
+running install_scripts
+writing list of installed files to '/home/vboxuser/ros2_ws/build/flembot_bringup/install.log'
