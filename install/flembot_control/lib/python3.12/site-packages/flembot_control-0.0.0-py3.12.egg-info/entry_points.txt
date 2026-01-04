@@ -1,0 +1,2 @@
+[console_scripts]
+teleop = flembot_control.teleop:main

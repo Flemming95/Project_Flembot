@@ -1,0 +1,32 @@
+running develop
+Removing /home/vboxuser/ros2_ws/install/flembot_control/lib/python3.12/site-packages/flembot-control.egg-link (link to .)
+running egg_info
+writing ../../build/flembot_control/flembot_control.egg-info/PKG-INFO
+writing dependency_links to ../../build/flembot_control/flembot_control.egg-info/dependency_links.txt
+writing entry points to ../../build/flembot_control/flembot_control.egg-info/entry_points.txt
+writing requirements to ../../build/flembot_control/flembot_control.egg-info/requires.txt
+writing top-level names to ../../build/flembot_control/flembot_control.egg-info/top_level.txt
+reading manifest file '../../build/flembot_control/flembot_control.egg-info/SOURCES.txt'
+writing manifest file '../../build/flembot_control/flembot_control.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/vboxuser/ros2_ws/build/flembot_control/build
+creating /home/vboxuser/ros2_ws/build/flembot_control/build/lib
+creating /home/vboxuser/ros2_ws/build/flembot_control/build/lib/flembot_control
+copying flembot_control/teleop.py -> /home/vboxuser/ros2_ws/build/flembot_control/build/lib/flembot_control
+copying flembot_control/__init__.py -> /home/vboxuser/ros2_ws/build/flembot_control/build/lib/flembot_control
+running install
+running install_lib
+creating /home/vboxuser/ros2_ws/install/flembot_control/lib/python3.12/site-packages/flembot_control
+copying /home/vboxuser/ros2_ws/build/flembot_control/build/lib/flembot_control/teleop.py -> /home/vboxuser/ros2_ws/install/flembot_control/lib/python3.12/site-packages/flembot_control
+copying /home/vboxuser/ros2_ws/build/flembot_control/build/lib/flembot_control/__init__.py -> /home/vboxuser/ros2_ws/install/flembot_control/lib/python3.12/site-packages/flembot_control
+byte-compiling /home/vboxuser/ros2_ws/install/flembot_control/lib/python3.12/site-packages/flembot_control/teleop.py to teleop.cpython-312.pyc
+byte-compiling /home/vboxuser/ros2_ws/install/flembot_control/lib/python3.12/site-packages/flembot_control/__init__.py to __init__.cpython-312.pyc
+running install_data
+copying resource/flembot_control -> /home/vboxuser/ros2_ws/install/flembot_control/share/ament_index/resource_index/packages
+copying package.xml -> /home/vboxuser/ros2_ws/install/flembot_control/share/flembot_control
+running install_egg_info
+Copying ../../build/flembot_control/flembot_control.egg-info to /home/vboxuser/ros2_ws/install/flembot_control/lib/python3.12/site-packages/flembot_control-0.0.0-py3.12.egg-info
+running install_scripts
+Installing teleop script to /home/vboxuser/ros2_ws/install/flembot_control/lib/flembot_control
+writing list of installed files to '/home/vboxuser/ros2_ws/build/flembot_control/install.log'
