@@ -33,7 +33,85 @@ SPAWN_SCRIPT_BASENAMES = [
     'spawn_entity.py', 'spawn_entity', 'gz_spawn_model', 'ros_gz_spawn_model'
 ]
 
-# ... keep helper functions find_package_with_file, find_spawn_launch, find_spawn_script, _locate_repo_config unchanged ...
+
+def find_package_with_file(pkg_names, filenames):
+    """
+    Return (pkg_name, full_path) for the first matching file found in package shares,
+    or (None, None) if none found.
+    """
+    for pkg in pkg_names:
+        try:
+            pkg_share = get_package_share_directory(pkg)
+        except PackageNotFoundError:
+            continue
+        for fname in filenames:
+            candidate = os.path.join(pkg_share, fname)
+            if os.path.exists(candidate):
+                return pkg, candidate
+    return None, None
+
+
+def find_spawn_launch(pkg_names, filenames):
+    """
+    Return (pkg_name, full_path) for the first matching spawn launch file found.
+    """
+    for pkg in pkg_names:
+        try:
+            pkg_share = get_package_share_directory(pkg)
+        except PackageNotFoundError:
+            continue
+        for fname in filenames:
+            candidate = os.path.join(pkg_share, fname)
+            if os.path.exists(candidate):
+                return pkg, candidate
+    return None, None
+
+
+def find_spawn_script(pkg_names, basenames):
+    """
+    Search inside each candidate package share for a file with one of the given basenames.
+    Return (pkg_name, full_path) or (None, None).
+    """
+    for pkg in pkg_names:
+        try:
+            pkg_share = get_package_share_directory(pkg)
+        except PackageNotFoundError:
+            continue
+        for root, _, files in os.walk(pkg_share):
+            for f in files:
+                if f in basenames:
+                    return pkg, os.path.join(root, f)
+    return None, None
+
+
+def _locate_repo_config():
+    """
+    Return a path to a ros_gz config file with the following preference:
+      1) installed package share: <share/flembot_bringup>/config/ros_gz_config.yaml
+      2) workspace source path: <cwd>/src/flembot_bringup/config/ros_gz_config.yaml
+      3) create a small temp file and return its path
+    """
+    # 1) installed package share
+    try:
+        share = get_package_share_directory('flembot_bringup')
+        installed_path = os.path.join(share, 'config', 'ros_gz_config.yaml')
+        if os.path.exists(installed_path):
+            return installed_path
+    except PackageNotFoundError:
+        pass
+
+    # 2) workspace source path (helpful during development before colcon install)
+    src_path = os.path.join(os.getcwd(), 'src', 'flembot_bringup', 'config', 'ros_gz_config.yaml')
+    if os.path.exists(src_path):
+        return src_path
+
+    # 3) create tiny temp file to satisfy the included launch's requirement
+    tmp = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.yaml', prefix='ros_gz_cfg_')
+    tmp.write('# auto-generated minimal ros_gz config\n[]\n')
+    tmp.flush()
+    tmp.close()
+    return tmp.name
+
 
 def generate_launch_description():
     declare_world_cmd = DeclareLaunchArgument(
@@ -67,7 +145,7 @@ def generate_launch_description():
         if not os.path.exists(world_file):
             raise RuntimeError(f"World file not found: {world_file}")
 
-        # Robot description (unchanged)
+        # Robot description
         description_pkg = get_package_share_directory('flembot_description')
         xacro_file = os.path.join(description_pkg, 'urdf', 'flembot.urdf.xacro')
         robot_description_config = xacro.process_file(xacro_file)
@@ -110,7 +188,7 @@ def generate_launch_description():
             launch_arguments=launch_args.items(),
         )
 
-        # Spawn robot (unchanged)
+        # Spawn robot
         spawn_pkg, spawn_launch = find_spawn_launch(SIM_PKG_CANDIDATES, SPAWN_LAUNCH_CANDIDATES)
         spawn_action = None
 
@@ -153,8 +231,7 @@ def generate_launch_description():
         actions.extend([sim_include, robot_state_publisher, spawn_action])
         return actions
 
-    from launch.actions import OpaqueFunction
     return LaunchDescription([
         declare_world_cmd,
         OpaqueFunction(function=resolve_world)
-        ])
+    ])
