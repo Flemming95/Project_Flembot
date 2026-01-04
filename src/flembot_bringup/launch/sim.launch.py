@@ -113,6 +113,51 @@ def _locate_repo_config():
     return tmp.name
 
 
+def _build_gz_resource_path_with_defaults(worlds_dir):
+    """
+    Build a robust GZ_RESOURCE_PATH that:
+      - preserves existing GZ_RESOURCE_PATH if set,
+      - prepends the local worlds_dir so local resources are found first,
+      - appends common system model/resource locations (only those that actually exist).
+    Returns the final string to set in the environment.
+    """
+    existing = os.environ.get('GZ_RESOURCE_PATH', '')
+
+    # Candidate system locations to append if they exist on this machine
+    sys_candidates = [
+        '/usr/share/gz',                 # gz system dir
+        '/usr/share/gz/models',
+        '/usr/share/gazebo',             # older gazebo paths
+        '/usr/share/gazebo/models',
+        '/usr/share/gazebo-11/models',   # common packaged path (Gazebo 11)
+        '/usr/share/gazebo-11',
+        '/usr/local/share/gazebo/models',
+        '/usr/local/share/gz/models',
+    ]
+
+    sys_existing = [p for p in sys_candidates if os.path.exists(p)]
+
+    # Build components; keep existing (if any) and add system existing paths
+    components = []
+    # local worlds dir should be first so local files are found preferentially
+    components.append(worlds_dir)
+    # keep existing if non-empty
+    if existing:
+        components.append(existing)
+    # append any system locations found
+    components.extend(sys_existing)
+
+    # Deduplicate while preserving order
+    seen = set()
+    final_components = []
+    for c in components:
+        if c not in seen:
+            final_components.append(c)
+            seen.add(c)
+
+    return ':'.join(final_components)
+
+
 def generate_launch_description():
     declare_world_cmd = DeclareLaunchArgument(
         'world',
@@ -175,10 +220,9 @@ def generate_launch_description():
             launch_args['config_file'] = _locate_repo_config()
             # Give ros_gz_sim the SDF path explicitly:
             launch_args['world_sdf_file'] = world_file
-            # Also set GZ_RESOURCE_PATH so gz finds models/worlds by name if needed
-            existing = os.environ.get('GZ_RESOURCE_PATH', '')
-            new_val = worlds_dir + (':' + existing if existing else '')
-            env_action = SetEnvironmentVariable('GZ_RESOURCE_PATH', new_val)
+            # Build a safe GZ_RESOURCE_PATH that preserves system paths
+            gz_resource_value = _build_gz_resource_path_with_defaults(worlds_dir)
+            env_action = SetEnvironmentVariable('GZ_RESOURCE_PATH', gz_resource_value)
         else:
             # legacy gazebo_ros: pass full path as 'world' argument (keeps compatibility)
             launch_args['world'] = world_file
