@@ -1,9 +1,0 @@
-# Minimal ros_gz config — top-level must be a YAML sequence.
-# Add bridge entries here as a sequence of mappings when you need them.
-# Example of a bridge entry:
-# - topic: /example/topic
-#   type: std_msgs/msg/String
-#   gz_topic: /example/topic
-#   direction: to_ros
-
-[]
