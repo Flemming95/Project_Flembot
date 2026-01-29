@@ -2,7 +2,16 @@
 
 ## About
 
-This package provides a simple differential drive robot model designed for use in Gazebo Harmonic simulation with ROS 2 Jazzy Jalisco. 
+This package provides a simple differential drive robot model designed for use in Gazebo Harmonic simulation with ROS 2 Jazzy Jalisco. The robot is equipped with a lidar sensor for object detection capabilities.
+
+## Features
+
+- Differential drive robot with two wheels and a caster
+- 360-degree lidar sensor for environment scanning
+- Object detection using lidar data clustering
+- Gazebo Harmonic simulation integration
+- ROS 2 Jazzy Jalisco compatibility
+- Teleoperation support (keyboard and joystick)
 
 ## Requirements
 
@@ -24,7 +33,8 @@ sudo apt install -y                         \
     ros-jazzy-joint-state-publisher         \
     ros-jazzy-xacro                         \
     ros-jazzy-teleop-twist-keyboard         \
-    ros-jazzy-teleop-twist-joy 
+    ros-jazzy-teleop-twist-joy              \
+    ros-jazzy-rviz2
 ```
 
 ## Usage
@@ -57,6 +67,17 @@ After building the package, launch the ```robot.launch.py``` file from the ```ga
 source install/setup.bash
 ros2 launch gazebo_differential_drive_robot robot.launch.py
 ```
+
+### Launch the Robot with Lidar Object Detection
+
+To launch the robot with lidar-based object detection enabled:
+
+```bash
+source install/setup.bash
+ros2 launch gazebo_differential_drive_robot robot_with_lidar.launch.py
+```
+
+For detailed information about lidar object detection, see [LIDAR_DETECTION.md](../../LIDAR_DETECTION.md).
 
 To launch the robot in a specified world with a custom initial pose, run the `robot.launch.py` file and specify the world path and robot pose arguments.
 
