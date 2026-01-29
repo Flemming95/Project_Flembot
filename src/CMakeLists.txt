@@ -17,7 +17,7 @@ install(
 )
 
 install(
-  PROGRAMS scripts/lidar_object_detector.py
+  PROGRAMS scripts/lidar_object_detector.py scripts/simple_lidar_reader.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
