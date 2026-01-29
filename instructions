@@ -1,0 +1,29 @@
+install required packages:
+
+sudo apt install -y                         \
+    ros-jazzy-ros-gz                        \
+    ros-jazzy-ros-gz-bridge                 \
+    ros-jazzy-joint-state-publisher         \
+    ros-jazzy-xacro                         \
+    ros-jazzy-teleop-twist-keyboard         \
+    ros-jazzy-teleop-twist-joy 
+    
+    
+    build:
+    
+   
+   source /opt/ros/jazzy/setup.bash
+colcon build
+
+
+launch:
+
+source install/setup.bash
+ros2 launch gazebo_differential_drive_robot robot.launch.py
+
+
+move:
+
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --rate 10
+
+
