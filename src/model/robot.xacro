@@ -31,6 +31,10 @@
     <xacro:property name="caster_inertia_y" value="${2.0/5.0 * caster_mass * caster_radius * caster_radius}"/>
     <xacro:property name="caster_inertia_z" value="${2.0/5.0 * caster_mass * caster_radius * caster_radius}"/>
 
+    <xacro:property name="lidar_radius" value="0.05"/>
+    <xacro:property name="lidar_height" value="0.07"/>
+    <xacro:property name="lidar_mass" value="0.1"/>
+
     <!-- Control Parameters -->    
     <xacro:property name="max_linear_acceleration" value="10"/>
 
@@ -132,6 +136,34 @@
         </inertial>
     </link>
 
+    <!-- Lidar Link -->
+    <link name="lidar_link">
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="${lidar_radius}" length="${lidar_height}"/>
+            </geometry>
+            <material name="lidar_material">
+                <color rgba="0.0 0.0 1.0 1.0"/>
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="${lidar_radius}" length="${lidar_height}"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="${lidar_mass}"/>
+            <inertia ixx="${1.0/12.0 * lidar_mass * (3*lidar_radius*lidar_radius + lidar_height*lidar_height)}" 
+                     ixy="0.0" ixz="0.0" 
+                     iyy="${1.0/12.0 * lidar_mass * (3*lidar_radius*lidar_radius + lidar_height*lidar_height)}" 
+                     iyz="0" 
+                     izz="${1.0/2.0 * lidar_mass * lidar_radius * lidar_radius}"/>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+        </inertial>
+    </link>
+
     <!-- Joints -->
 
     <!-- Left Wheel Joint -->
@@ -159,6 +191,13 @@
         <origin xyz="${caster_offset} 0 -${caster_radius/2}" rpy="0 0 0"/>
         <parent link="body_link"/>
         <child link="caster_link"/>
+    </joint>
+
+    <!-- Lidar Joint (fixed) -->
+    <joint name="lidar_joint" type="fixed">
+        <origin xyz="0.0 0.0 ${body_height/2 + lidar_height/2}" rpy="0 0 0"/>
+        <parent link="body_link"/>
+        <child link="lidar_link"/>
     </joint>
 
     <!-- Gazebo Parameters -->
@@ -200,6 +239,36 @@
             <joint_name>right_wheel_joint</joint_name>
             <joint_name>left_wheel_joint</joint_name>
         </plugin>
+    </gazebo>
+
+    <!-- Lidar Sensor -->
+    <gazebo reference="lidar_link">
+        <sensor name="lidar_sensor" type="gpu_lidar">
+            <topic>lidar</topic>
+            <update_rate>10</update_rate>
+            <lidar>
+                <scan>
+                    <horizontal>
+                        <samples>360</samples>
+                        <resolution>1</resolution>
+                        <min_angle>-${PI}</min_angle>
+                        <max_angle>${PI}</max_angle>
+                    </horizontal>
+                </scan>
+                <range>
+                    <min>0.1</min>
+                    <max>30.0</max>
+                    <resolution>0.01</resolution>
+                </range>
+                <noise>
+                    <type>gaussian</type>
+                    <mean>0.0</mean>
+                    <stddev>0.01</stddev>
+                </noise>
+            </lidar>
+            <alwaysOn>true</alwaysOn>
+            <visualize>true</visualize>
+        </sensor>
     </gazebo>
 
 </robot>
