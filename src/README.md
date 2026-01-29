@@ -77,7 +77,7 @@ source install/setup.bash
 ros2 launch gazebo_differential_drive_robot robot_with_lidar.launch.py
 ```
 
-For detailed information about lidar object detection, see [LIDAR_DETECTION.md](../../LIDAR_DETECTION.md).
+For detailed information about lidar object detection, see [LIDAR_DETECTION.md](../LIDAR_DETECTION.md).
 
 To launch the robot in a specified world with a custom initial pose, run the `robot.launch.py` file and specify the world path and robot pose arguments.
 

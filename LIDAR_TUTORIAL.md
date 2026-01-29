@@ -245,8 +245,8 @@ Now that you understand the basics:
 
 ## Additional Resources
 
-- [ROS 2 LaserScan Documentation](http://docs.ros.org/en/api/sensor_msgs/html/msg/LaserScan.html)
-- [ROS 2 Visualization Markers](http://wiki.ros.org/rviz/DisplayTypes/Marker)
+- [ROS 2 LaserScan Documentation](https://docs.ros.org/en/api/sensor_msgs/html/msg/LaserScan.html)
+- [ROS 2 Visualization Markers](https://wiki.ros.org/rviz/DisplayTypes/Marker)
 - [Gazebo Sensor Plugins](https://gazebosim.org/api/gazebo/7/classgazebo_1_1sensors_1_1GpuRaySensor.html)
 - [Point Cloud Library (PCL) for advanced processing](https://pointclouds.org/)
 

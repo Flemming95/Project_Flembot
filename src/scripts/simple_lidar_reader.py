@@ -55,10 +55,18 @@ class SimpleLidarReader(Node):
         max_distance = max(valid_ranges)
         avg_distance = sum(valid_ranges) / len(valid_ranges)
         
-        # Find closest obstacle direction
-        min_idx = msg.ranges.index(min_distance)
-        closest_angle = msg.angle_min + (min_idx * msg.angle_increment)
-        closest_angle_deg = math.degrees(closest_angle)
+        # Find closest obstacle direction - find index in original ranges
+        min_idx = None
+        for i, r in enumerate(msg.ranges):
+            if msg.range_min <= r <= msg.range_max and r == min_distance:
+                min_idx = i
+                break
+        
+        if min_idx is not None:
+            closest_angle = msg.angle_min + (min_idx * msg.angle_increment)
+            closest_angle_deg = math.degrees(closest_angle)
+        else:
+            closest_angle_deg = 0.0
         
         # Print statistics
         self.get_logger().info(

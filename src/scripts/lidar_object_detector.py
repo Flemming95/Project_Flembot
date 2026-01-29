@@ -11,9 +11,8 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import LaserScan
 from visualization_msgs.msg import Marker, MarkerArray
-from geometry_msgs.msg import Point
+from builtin_interfaces.msg import Duration
 import math
-import numpy as np
 
 
 class LidarObjectDetector(Node):
@@ -61,49 +60,30 @@ class LidarObjectDetector(Node):
         Args:
             msg (LaserScan): The incoming laser scan message
         """
-        # Convert polar coordinates to Cartesian
-        points = self.scan_to_cartesian(msg)
+        # Convert polar coordinates to Cartesian and filter in one pass
+        points = []
+        angle = msg.angle_min
         
-        # Filter out invalid points (inf, nan)
-        valid_points = []
-        for point in points:
-            if math.isfinite(point[0]) and math.isfinite(point[1]):
-                valid_points.append(point)
+        for r in msg.ranges:
+            if msg.range_min <= r <= msg.range_max:
+                x = r * math.cos(angle)
+                y = r * math.sin(angle)
+                if math.isfinite(x) and math.isfinite(y):
+                    points.append((x, y))
+            angle += msg.angle_increment
         
-        if len(valid_points) < self.min_cluster_size:
+        if len(points) < self.min_cluster_size:
             # Not enough points to detect objects
             self.publish_empty_markers()
             return
         
         # Cluster points to detect objects
-        clusters = self.cluster_points(valid_points)
+        clusters = self.cluster_points(points)
         
         # Publish detected objects as markers
         self.publish_markers(clusters, msg.header)
         
         self.get_logger().debug(f'Detected {len(clusters)} objects')
-
-    def scan_to_cartesian(self, scan):
-        """
-        Convert laser scan data from polar to Cartesian coordinates.
-        
-        Args:
-            scan (LaserScan): The laser scan message
-            
-        Returns:
-            list: List of (x, y) tuples representing points in Cartesian coordinates
-        """
-        points = []
-        angle = scan.angle_min
-        
-        for r in scan.ranges:
-            if scan.range_min <= r <= scan.range_max:
-                x = r * math.cos(angle)
-                y = r * math.sin(angle)
-                points.append((x, y))
-            angle += scan.angle_increment
-            
-        return points
 
     def cluster_points(self, points):
         """
@@ -202,7 +182,6 @@ class LidarObjectDetector(Node):
             # Create a sphere marker for the object center
             marker = Marker()
             marker.header = header
-            marker.header.frame_id = 'body_link'  # Relative to robot base
             marker.ns = 'detected_objects'
             marker.id = i
             marker.type = Marker.SPHERE
@@ -225,14 +204,13 @@ class LidarObjectDetector(Node):
             marker.color.b = 0.0
             marker.color.a = 0.8
             
-            marker.lifetime.sec = 1
+            marker.lifetime = Duration(sec=1, nanosec=0)
             
             marker_array.markers.append(marker)
             
             # Create a text marker showing the number of points
             text_marker = Marker()
             text_marker.header = header
-            text_marker.header.frame_id = 'body_link'
             text_marker.ns = 'object_labels'
             text_marker.id = i + 1000
             text_marker.type = Marker.TEXT_VIEW_FACING
@@ -251,7 +229,7 @@ class LidarObjectDetector(Node):
             text_marker.color.a = 1.0
             
             text_marker.text = f'Obj {i}\n{len(cluster)} pts'
-            text_marker.lifetime.sec = 1
+            text_marker.lifetime = Duration(sec=1, nanosec=0)
             
             marker_array.markers.append(text_marker)
         

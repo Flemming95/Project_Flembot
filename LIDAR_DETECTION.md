@@ -124,12 +124,12 @@ The lidar sensor visualization is enabled by default in Gazebo. You should see t
 
 ### Subscribed Topics
 
-- `/lidar/scan` ([sensor_msgs/LaserScan](http://docs.ros.org/en/api/sensor_msgs/html/msg/LaserScan.html))
+- `/lidar/scan` ([sensor_msgs/LaserScan](https://docs.ros.org/en/api/sensor_msgs/html/msg/LaserScan.html))
   - Lidar scan data from the robot
 
 ### Published Topics
 
-- `/detected_objects` ([visualization_msgs/MarkerArray](http://docs.ros.org/en/api/visualization_msgs/html/msg/MarkerArray.html))
+- `/detected_objects` ([visualization_msgs/MarkerArray](https://docs.ros.org/en/api/visualization_msgs/html/msg/MarkerArray.html))
   - Visualization markers for detected objects
   - Green spheres represent object centroids
   - White text labels show object ID and point count
@@ -219,5 +219,5 @@ Potential improvements to the object detection system:
 
 - [ROS2 Jazzy Documentation](https://docs.ros.org/en/jazzy/)
 - [Gazebo Harmonic Documentation](https://gazebosim.org/docs/harmonic/)
-- [LaserScan Message](http://docs.ros.org/en/api/sensor_msgs/html/msg/LaserScan.html)
-- [Visualization Markers](http://wiki.ros.org/rviz/DisplayTypes/Marker)
+- [LaserScan Message](https://docs.ros.org/en/api/sensor_msgs/html/msg/LaserScan.html)
+- [Visualization Markers](https://wiki.ros.org/rviz/DisplayTypes/Marker)
