@@ -322,7 +322,8 @@ class ReactiveNavigationController(Node):
                         self.command_queue.append(cmd)
                         self.get_logger().info(f'Command queued: {cmd.action}')
                     
-                    if self.state == NavigationState.IDLE:
+                    # Start executing if we're idle or if previous commands completed
+                    if self.state in (NavigationState.IDLE, NavigationState.COMPLETED):
                         self._start_next_command()
         except ValueError as e:
             self.get_logger().error(f'Failed to parse command: {e}')
