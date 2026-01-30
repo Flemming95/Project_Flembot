@@ -235,7 +235,9 @@ class LidarNavigationSupport(Node):
         
         # Calculate confidence based on how much better the safest sector is
         avg_dist = sum(sector_distances) / len(sector_distances)
-        if avg_dist > 0:
+        # Use small epsilon to avoid floating point issues near zero
+        epsilon = 1e-6
+        if avg_dist > epsilon:
             confidence = min((max_dist - avg_dist) / avg_dist + 0.5, 1.0)
         else:
             confidence = 0.5

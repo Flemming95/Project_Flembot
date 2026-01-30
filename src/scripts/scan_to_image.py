@@ -218,21 +218,35 @@ class ScanToImage(Node):
 
     def _add_timestamp(self, image):
         """
-        Add timestamp text to the image.
+        Add timestamp indicator to the image corner.
+        
+        Note: Full text rendering requires OpenCV. This adds a simple visual
+        indicator that changes with time to show the image is updating.
         
         Args:
             image: The image array
         """
-        # Simple text rendering using basic shapes
-        # This is a simplified version - could use OpenCV putText for better quality
-        timestamp = datetime.now().strftime("%H:%M:%S")
-        # For simplicity, we just add a small indicator in the corner
-        # A production version would use cv2.putText
-        pass
+        # Add a small blinking indicator in the corner to show live updates
+        # This changes based on the current second to indicate updates
+        timestamp = datetime.now()
+        indicator_on = timestamp.second % 2 == 0
+        
+        if indicator_on:
+            # Draw a small white dot in the top-right corner
+            for dx in range(-3, 4):
+                for dy in range(-3, 4):
+                    if dx * dx + dy * dy <= 9:  # Circle with radius 3
+                        px = self.image_size - 15 + dx
+                        py = 15 + dy
+                        if 0 <= px < self.image_size and 0 <= py < self.image_size:
+                            image[py, px] = (255, 255, 255)
 
     def _add_scale_info(self, image):
         """
         Add scale information to the image.
+        
+        Draws a scale bar at the bottom of the image to indicate distance.
+        The bar represents a fixed distance based on the max_range setting.
         
         Args:
             image: The image array
@@ -247,6 +261,13 @@ class ScanToImage(Node):
             if 0 <= x < self.image_size:
                 image[bar_y, x] = (255, 255, 255)
                 image[bar_y - 1, x] = (255, 255, 255)
+        
+        # Add end markers
+        for y in range(bar_y - 5, bar_y + 3):
+            if 0 <= y < self.image_size:
+                image[y, bar_x_start] = (255, 255, 255)
+                end_x = min(bar_x_start + bar_length - 1, self.image_size - 1)
+                image[y, end_x] = (255, 255, 255)
 
     def _save_image(self, image):
         """
@@ -257,12 +278,10 @@ class ScanToImage(Node):
         """
         try:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-            filename = os.path.join(self.save_path, f'scan_{timestamp}.png')
+            filename = os.path.join(self.save_path, f'scan_{timestamp}.npy')
             
-            # Use numpy to save as a simple format
-            # For full PNG support, would need cv2.imwrite
-            # Here we'll save as raw data that can be converted later
-            np.save(filename.replace('.png', '.npy'), image)
+            # Save as numpy array (for PNG support, would need cv2.imwrite)
+            np.save(filename, image)
             
             self.get_logger().debug(f'Saved scan image: {filename}')
         except Exception as e:
