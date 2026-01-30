@@ -95,6 +95,27 @@ This launch file provides:
 - Pre-configured RViz2 visualization
 - Ready for velocity commands via `/cmd_vel` topic
 
+### Launch the Robot with Reactive Navigation (Object Detection-Based Navigation)
+
+For autonomous navigation based on object detection (e.g., "move forward until close to wall, then turn"):
+
+```bash
+source install/setup.bash
+ros2 launch gazebo_differential_drive_robot robot_reactive_navigation.launch.py
+```
+
+Then send navigation commands:
+
+```bash
+# Move forward until wall is detected within 0.5m, then turn left
+ros2 topic pub /navigation/command std_msgs/msg/String "data: 'forward_until_close:front:0.5:turn_left'" --once
+
+# Or run the examples script
+ros2 run gazebo_differential_drive_robot navigation_examples.py
+```
+
+For detailed information about reactive navigation, see [REACTIVE_NAVIGATION.md](../REACTIVE_NAVIGATION.md).
+
 To launch the robot in a specified world with a custom initial pose, run the `robot.launch.py` file and specify the world path and robot pose arguments.
 
 
