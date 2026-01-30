@@ -12,7 +12,7 @@ find_package(ament_cmake REQUIRED)
 # find_package(<dependency> REQUIRED)
 
 install(
-  DIRECTORY launch model config worlds
+  DIRECTORY launch model config worlds gridmaps
   DESTINATION share/${PROJECT_NAME}
 )
 
@@ -24,6 +24,10 @@ install(
     scripts/lidar_navigation_support.py
     scripts/reactive_navigation_controller.py
     scripts/navigation_examples.py
+    scripts/real_gridmap_generator.py
+    scripts/lidar_gridmap_generator.py
+    scripts/gridmap_comparator.py
+    scripts/wall_following_scanner.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
