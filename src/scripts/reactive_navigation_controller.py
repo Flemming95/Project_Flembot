@@ -127,7 +127,7 @@ class ReactiveNavigationController(Node):
         # Movement tracking
         self.distance_traveled = 0.0
         self.angle_turned = 0.0
-        self.last_update_time = None
+        self.last_control_time = None  # For actual elapsed time tracking
         self.current_velocity = Twist()
         
         # Create subscriber to lidar scan
@@ -255,13 +255,12 @@ class ReactiveNavigationController(Node):
         
         # Define angle ranges for each direction (in radians, 0 = front)
         # Angles follow ROS convention: positive = left (counter-clockwise)
+        # Note: BACK and BACK_RIGHT require special handling due to angle wrapping at ±pi
         direction_ranges = {
             Direction.FRONT.value: (-self.front_cone_angle / 2, self.front_cone_angle / 2),
             Direction.FRONT_LEFT.value: (self.front_cone_angle / 2, math.pi / 2),
             Direction.LEFT.value: (math.pi / 2 - self.side_cone_angle / 2, math.pi / 2 + self.side_cone_angle / 2),
-            Direction.BACK_LEFT.value: (math.pi / 2, math.pi),
-            Direction.BACK.value: (math.pi - self.front_cone_angle / 2, math.pi),
-            Direction.BACK_RIGHT.value: (-math.pi, -math.pi / 2),
+            Direction.BACK_LEFT.value: (math.pi / 2, math.pi - self.front_cone_angle / 2),
             Direction.RIGHT.value: (-math.pi / 2 - self.side_cone_angle / 2, -math.pi / 2 + self.side_cone_angle / 2),
             Direction.FRONT_RIGHT.value: (-math.pi / 2, -self.front_cone_angle / 2),
         }
@@ -284,14 +283,20 @@ class ReactiveNavigationController(Node):
         
         # Handle back direction which wraps around ±pi
         back_min = float('inf')
+        back_right_min = float('inf')
         angle = msg.angle_min
         for r in msg.ranges:
             if self.min_valid_range <= r <= self.max_valid_range and math.isfinite(r):
                 normalized_angle = math.atan2(math.sin(angle), math.cos(angle))
+                # Back: angles close to ±pi
                 if abs(normalized_angle) > math.pi - self.front_cone_angle / 2:
                     back_min = min(back_min, r)
+                # Back-right: negative angles between -pi and -pi/2
+                if -math.pi + self.front_cone_angle / 2 < normalized_angle < -math.pi / 2:
+                    back_right_min = min(back_right_min, r)
             angle += msg.angle_increment
         distances[Direction.BACK.value] = back_min
+        distances[Direction.BACK_RIGHT.value] = back_right_min
         
         # Replace inf with max_valid_range for directions with no readings
         for direction in distances:
@@ -564,6 +569,27 @@ class ReactiveNavigationController(Node):
             self.get_logger().error(f'Unknown action: {action}')
             return True
 
+    def _get_elapsed_time(self) -> float:
+        """
+        Get elapsed time since last control loop iteration.
+        
+        Uses actual timestamps for accurate tracking instead of assuming
+        a fixed control loop frequency.
+        
+        Returns:
+            Elapsed time in seconds
+        """
+        current_time = self.get_clock().now()
+        if self.last_control_time is None:
+            self.last_control_time = current_time
+            return 0.05  # Default to expected 20 Hz on first call
+        
+        elapsed = (current_time - self.last_control_time).nanoseconds / 1e9
+        self.last_control_time = current_time
+        
+        # Clamp to reasonable range to handle pauses or delays
+        return min(max(elapsed, 0.001), 0.5)
+
     def _execute_forward(self, cmd: NavigationCommand) -> bool:
         """Execute forward movement command."""
         vel = Twist()
@@ -571,7 +597,8 @@ class ReactiveNavigationController(Node):
         self._publish_velocity(vel)
         
         if cmd.distance is not None:
-            self.distance_traveled += self.linear_speed * 0.05  # 20 Hz
+            dt = self._get_elapsed_time()
+            self.distance_traveled += self.linear_speed * dt
             if self.distance_traveled >= cmd.distance:
                 self._stop_robot()
                 return True
@@ -585,7 +612,8 @@ class ReactiveNavigationController(Node):
         self._publish_velocity(vel)
         
         if cmd.distance is not None:
-            self.distance_traveled += self.linear_speed * 0.05
+            dt = self._get_elapsed_time()
+            self.distance_traveled += self.linear_speed * dt
             if self.distance_traveled >= cmd.distance:
                 self._stop_robot()
                 return True
@@ -600,7 +628,8 @@ class ReactiveNavigationController(Node):
         
         if cmd.angle is not None:
             angle_rad = math.radians(cmd.angle)
-            self.angle_turned += self.angular_speed * 0.05
+            dt = self._get_elapsed_time()
+            self.angle_turned += self.angular_speed * dt
             if self.angle_turned >= angle_rad:
                 self._stop_robot()
                 return True
@@ -615,7 +644,8 @@ class ReactiveNavigationController(Node):
         
         if cmd.angle is not None:
             angle_rad = math.radians(cmd.angle)
-            self.angle_turned += self.angular_speed * 0.05
+            dt = self._get_elapsed_time()
+            self.angle_turned += self.angular_speed * dt
             if self.angle_turned >= angle_rad:
                 self._stop_robot()
                 return True
@@ -644,7 +674,8 @@ class ReactiveNavigationController(Node):
             # Queue next action if specified
             if cmd.next_action:
                 next_cmds = self.parse_command(cmd.next_action)
-                for nc in next_cmds:
+                # Insert in reverse order to maintain execution sequence
+                for nc in reversed(next_cmds):
                     self.command_queue.insert(0, nc)
             
             return True
@@ -671,7 +702,8 @@ class ReactiveNavigationController(Node):
             
             if cmd.next_action:
                 next_cmds = self.parse_command(cmd.next_action)
-                for nc in next_cmds:
+                # Insert in reverse order to maintain execution sequence
+                for nc in reversed(next_cmds):
                     self.command_queue.insert(0, nc)
             
             return True
@@ -690,9 +722,11 @@ class ReactiveNavigationController(Node):
         turn_direction = cmd.direction or 'left'
         clear_threshold = cmd.condition_distance or self.default_obstacle_threshold
         
-        front_dist = self.direction_distances.get(Direction.FRONT.value, 0.0)
+        # Use inf as default when sensor data unavailable to avoid false positives
+        front_dist = self.direction_distances.get(Direction.FRONT.value, float('inf'))
         
-        if front_dist >= clear_threshold:
+        # Only consider path clear if we have valid sensor data and it exceeds threshold
+        if self.direction_distances and front_dist >= clear_threshold:
             self.get_logger().info(
                 f'Clear path found: front distance {front_dist:.2f}m >= {clear_threshold}m'
             )
@@ -756,7 +790,8 @@ class ReactiveNavigationController(Node):
         
         # This command runs continuously until stopped or a distance limit is reached
         if cmd.condition_distance is not None:
-            self.distance_traveled += self.linear_speed * 0.05
+            dt = self._get_elapsed_time()
+            self.distance_traveled += self.linear_speed * dt
             if self.distance_traveled >= cmd.condition_distance:
                 self._stop_robot()
                 return True
@@ -769,6 +804,7 @@ class ReactiveNavigationController(Node):
         self.current_command = None
         self.distance_traveled = 0.0
         self.angle_turned = 0.0
+        self.last_control_time = None  # Reset for next command
         
         if self.command_queue:
             self._start_next_command()
