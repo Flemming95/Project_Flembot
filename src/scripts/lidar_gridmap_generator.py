@@ -20,6 +20,7 @@ Parameters:
     - origin_y: Y origin of gridmap (default: -5.0m)
     - output_dir: Directory to save gridmaps
     - world_name: Name of the world being scanned
+    - shutdown_after_save: Auto shutdown after saving gridmap (default: False)
 """
 
 import rclpy
@@ -60,6 +61,7 @@ class LidarGridmapGenerator(Node):
         self.declare_parameter('world_name', 'unknown')
         self.declare_parameter('hit_threshold', 3)  # Hits needed to mark occupied
         self.declare_parameter('miss_threshold', 5)  # Misses needed to mark free
+        self.declare_parameter('shutdown_after_save', False)  # Auto shutdown after saving
         
         # Get parameters
         self.resolution = self.get_parameter('resolution').value
@@ -71,6 +73,7 @@ class LidarGridmapGenerator(Node):
         self.world_name = self.get_parameter('world_name').value
         self.hit_threshold = self.get_parameter('hit_threshold').value
         self.miss_threshold = self.get_parameter('miss_threshold').value
+        self.shutdown_after_save = self.get_parameter('shutdown_after_save').value
         
         # Calculate grid dimensions
         self.width = int(self.world_size_x / self.resolution)
@@ -97,6 +100,9 @@ class LidarGridmapGenerator(Node):
         # Lock for thread-safe gridmap updates when using multi-threaded executors
         # or when service calls modify state during scan callbacks
         self.lock = threading.Lock()
+        
+        # Shutdown flag for clean termination
+        self.shutdown_requested = False
         
         # Create subscriber to lidar scan
         self.scan_sub = self.create_subscription(
@@ -406,6 +412,11 @@ class LidarGridmapGenerator(Node):
             complete_msg = Bool()
             complete_msg.data = True
             self.complete_pub.publish(complete_msg)
+            
+            # Auto-shutdown if enabled
+            if self.shutdown_after_save:
+                self.get_logger().info('Auto-shutdown enabled, setting shutdown flag...')
+                self.shutdown_requested = True
         except Exception as e:
             response.success = False
             response.message = f'Error saving gridmap: {str(e)}'
@@ -495,7 +506,12 @@ def main(args=None):
     node = LidarGridmapGenerator()
     
     try:
-        rclpy.spin(node)
+        # Use spin_once in a loop to check for shutdown flag
+        while rclpy.ok() and not node.shutdown_requested:
+            rclpy.spin_once(node, timeout_sec=0.1)
+        
+        if node.shutdown_requested:
+            node.get_logger().info('Shutdown requested, terminating...')
     except KeyboardInterrupt:
         node.get_logger().info('Shutting down...')
     finally:

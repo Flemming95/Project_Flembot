@@ -313,49 +313,98 @@ class GridmapComparator:
             json.dump(results, f, indent=2)
 
 
-def get_package_paths() -> Tuple[str, str]:
+def get_package_paths() -> Tuple[List[str], List[str]]:
     """
     Get the paths to the real and created gridmaps directories.
     
+    Searches in multiple locations to handle both source and installed packages:
+    - Source directory: src/gridmaps/
+    - Install directory: install/.../lib/gridmaps/
+    
     Returns:
-        Tuple of (real_dir, created_dir)
+        Tuple of (list of real_dirs, list of created_dirs)
     """
+    real_dirs = []
+    created_dirs = []
+    
     script_dir = os.path.dirname(os.path.abspath(__file__))
     package_dir = os.path.dirname(script_dir)
     
+    # Check relative to script location (works for both source and install)
     real_dir = os.path.join(package_dir, 'gridmaps', 'real')
     created_dir = os.path.join(package_dir, 'gridmaps', 'created')
     
-    return real_dir, created_dir
+    if os.path.exists(real_dir):
+        real_dirs.append(real_dir)
+    if os.path.exists(created_dir):
+        created_dirs.append(created_dir)
+    
+    # Also check common workspace locations
+    # Try to find workspace root by looking for 'src' directory
+    current = os.path.abspath(script_dir)
+    for _ in range(10):  # Limit search depth
+        parent = os.path.dirname(current)
+        if parent == current:
+            break
+        
+        # Check for typical ROS2 workspace structure
+        src_gridmaps_real = os.path.join(parent, 'src', 'gridmaps', 'real')
+        src_gridmaps_created = os.path.join(parent, 'src', 'gridmaps', 'created')
+        
+        if os.path.exists(src_gridmaps_real) and src_gridmaps_real not in real_dirs:
+            real_dirs.append(src_gridmaps_real)
+        if os.path.exists(src_gridmaps_created) and src_gridmaps_created not in created_dirs:
+            created_dirs.append(src_gridmaps_created)
+        
+        # Check install directory
+        install_gridmaps_real = os.path.join(parent, 'install', 'gazebo_differential_drive_robot', 
+                                             'lib', 'gridmaps', 'real')
+        install_gridmaps_created = os.path.join(parent, 'install', 'gazebo_differential_drive_robot',
+                                                'lib', 'gridmaps', 'created')
+        
+        if os.path.exists(install_gridmaps_real) and install_gridmaps_real not in real_dirs:
+            real_dirs.append(install_gridmaps_real)
+        if os.path.exists(install_gridmaps_created) and install_gridmaps_created not in created_dirs:
+            created_dirs.append(install_gridmaps_created)
+        
+        current = parent
+    
+    return real_dirs, created_dirs
 
 
-def find_gridmaps_for_world(world_name: str, real_dir: str, 
-                            created_dir: str) -> Tuple[Optional[str], List[str]]:
+def find_gridmaps_for_world(world_name: str, real_dirs: List[str], 
+                            created_dirs: List[str]) -> Tuple[Optional[str], List[str]]:
     """
     Find gridmap files for a specific world.
     
     Args:
         world_name: Name of the world
-        real_dir: Directory containing real gridmaps
-        created_dir: Directory containing created gridmaps
+        real_dirs: List of directories containing real gridmaps
+        created_dirs: List of directories containing created gridmaps
         
     Returns:
         Tuple of (real_gridmap_path, list of created_gridmap_paths)
     """
     # Find real gridmap
     real_path = None
-    if os.path.exists(real_dir):
-        for f in os.listdir(real_dir):
-            if f.startswith(world_name) and f.endswith('_real.npy'):
-                real_path = os.path.join(real_dir, f)
-                break
+    for real_dir in real_dirs:
+        if os.path.exists(real_dir):
+            for f in os.listdir(real_dir):
+                if f.startswith(world_name) and f.endswith('_real.npy'):
+                    real_path = os.path.join(real_dir, f)
+                    break
+        if real_path:
+            break
     
-    # Find created gridmaps
+    # Find created gridmaps from all directories
     created_paths = []
-    if os.path.exists(created_dir):
-        for f in os.listdir(created_dir):
-            if f.startswith(world_name) and f.endswith('.npy') and 'created' in f:
-                created_paths.append(os.path.join(created_dir, f))
+    for created_dir in created_dirs:
+        if os.path.exists(created_dir):
+            for f in os.listdir(created_dir):
+                if f.startswith(world_name) and f.endswith('.npy') and 'created' in f:
+                    filepath = os.path.join(created_dir, f)
+                    if filepath not in created_paths:
+                        created_paths.append(filepath)
     
     return real_path, sorted(created_paths)
 
@@ -377,17 +426,46 @@ def main():
                         help='Output directory for comparison reports')
     parser.add_argument('--all', '-a', action='store_true',
                         help='Compare all available worlds')
+    parser.add_argument('--real-dir', type=str,
+                        help='Directory containing real gridmaps (can specify multiple with comma)')
+    parser.add_argument('--created-dir', type=str,
+                        help='Directory containing created gridmaps (can specify multiple with comma)')
     
     args = parser.parse_args()
     
     comparator = GridmapComparator()
-    real_dir, created_dir = get_package_paths()
+    
+    # Get default paths, then override with explicit arguments if provided
+    real_dirs, created_dirs = get_package_paths()
+    
+    if args.real_dir:
+        # Parse comma-separated directories
+        explicit_real_dirs = [d.strip() for d in args.real_dir.split(',')]
+        real_dirs = [d for d in explicit_real_dirs if os.path.exists(d)]
+        if not real_dirs:
+            print(f"Error: Specified real-dir(s) do not exist: {args.real_dir}")
+            sys.exit(1)
+    
+    if args.created_dir:
+        # Parse comma-separated directories
+        explicit_created_dirs = [d.strip() for d in args.created_dir.split(',')]
+        created_dirs = [d for d in explicit_created_dirs if os.path.exists(d)]
+        if not created_dirs:
+            print(f"Error: Specified created-dir(s) do not exist: {args.created_dir}")
+            sys.exit(1)
+    
+    # Print search paths for debugging
+    print(f"Searching for real gridmaps in: {real_dirs}")
+    print(f"Searching for created gridmaps in: {created_dirs}")
+    print()
     
     # Determine output directory
     if args.output:
         output_dir = args.output
+    elif real_dirs:
+        output_dir = os.path.join(os.path.dirname(real_dirs[0]), 'comparisons')
     else:
-        output_dir = os.path.join(os.path.dirname(real_dir), 'comparisons')
+        output_dir = os.path.join(os.getcwd(), 'gridmap_comparisons')
     os.makedirs(output_dir, exist_ok=True)
     
     if args.real_gridmap and args.created_gridmap:
@@ -425,7 +503,7 @@ def main():
     elif args.world:
         # Compare all gridmaps for a specific world
         real_path, created_paths = find_gridmaps_for_world(
-            args.world, real_dir, created_dir
+            args.world, real_dirs, created_dirs
         )
         
         if not real_path:
@@ -469,17 +547,19 @@ def main():
         
     elif args.all:
         # Compare all available worlds
-        if not os.path.exists(real_dir):
-            print(f"Error: Real gridmaps directory not found: {real_dir}")
+        if not real_dirs:
+            print("Error: No real gridmaps directories found")
             print("Run: python3 real_gridmap_generator.py")
             sys.exit(1)
         
         # Get all world names from real gridmaps
         world_names = set()
-        for f in os.listdir(real_dir):
-            if f.endswith('_real.npy'):
-                world_name = f.replace('_real.npy', '')
-                world_names.add(world_name)
+        for real_dir in real_dirs:
+            if os.path.exists(real_dir):
+                for f in os.listdir(real_dir):
+                    if f.endswith('_real.npy'):
+                        world_name = f.replace('_real.npy', '')
+                        world_names.add(world_name)
         
         if not world_names:
             print("No real gridmaps found.")
@@ -490,7 +570,7 @@ def main():
         
         for world_name in sorted(world_names):
             real_path, created_paths = find_gridmaps_for_world(
-                world_name, real_dir, created_dir
+                world_name, real_dirs, created_dirs
             )
             
             if not created_paths:
