@@ -75,6 +75,7 @@ def resolve_world_path(world_arg: str, package_name: str) -> str:
         return full_path
     
     # Fall back to returning the argument as-is (for built-in Gazebo worlds like 'empty.sdf')
+    # Note: If the world file doesn't exist, Gazebo will report the error
     return world_arg
 
 
@@ -135,11 +136,11 @@ def generate_launch_description():
     # Process the Xacro file to generate the URDF representation of the robot
     robot_description = xacro.process_file(robot_model_path).toxml()
 
-    # Function to create launch actions with resolved world path
-    def launch_setup(context):
+    # Function to create Gazebo launch with resolved world path
+    def create_gazebo_launch_with_resolved_world(context):
         # Get the world argument value at launch time
-        world_arg_value = LaunchConfiguration('world').perform(context)
-        resolved_world = resolve_world_path(world_arg_value, package_name)
+        world_input = LaunchConfiguration('world').perform(context)
+        resolved_world = resolve_world_path(world_input, package_name)
 
         # Prepare to include the Gazebo simulation launch file
         gazebo_pkg_launch = PythonLaunchDescriptionSource(
@@ -208,7 +209,7 @@ def generate_launch_description():
         roll_arg,
         pitch_arg,
         yaw_arg,
-        OpaqueFunction(function=launch_setup),
+        OpaqueFunction(function=create_gazebo_launch_with_resolved_world),
         spawn_model_gazebo_node,
         robot_state_publisher_node,
         gz_bridge_node,
