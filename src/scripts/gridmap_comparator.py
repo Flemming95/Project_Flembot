@@ -28,10 +28,6 @@ class GridmapComparator:
     Compares real and created gridmaps to measure mapping accuracy.
     """
     
-    def __init__(self):
-        """Initialize the comparator."""
-        pass
-    
     def load_gridmap(self, filepath: str) -> Tuple[np.ndarray, Optional[Dict]]:
         """
         Load a gridmap and its metadata.

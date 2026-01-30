@@ -152,10 +152,13 @@ class RealGridmapGenerator:
         
         # Iterate over bounding box and fill cells inside the rotated rectangle
         step = self.resolution / 2  # Sub-cell sampling for accuracy
-        x = min_x
-        while x <= max_x:
-            y = min_y
-            while y <= max_y:
+        
+        # Use numpy linspace to avoid floating point precision issues
+        num_x_steps = max(1, int((max_x - min_x) / step) + 1)
+        num_y_steps = max(1, int((max_y - min_y) / step) + 1)
+        
+        for x in np.linspace(min_x, max_x, num_x_steps):
+            for y in np.linspace(min_y, max_y, num_y_steps):
                 # Check if point is inside the rotated rectangle
                 # Transform point to box-local coordinates
                 dx = x - center_x
@@ -167,9 +170,6 @@ class RealGridmapGenerator:
                     gx, gy = self.world_to_grid(x, y)
                     if 0 <= gx < self.width and 0 <= gy < self.height:
                         gridmap[gy, gx] = 100  # Occupied
-                
-                y += step
-            x += step
     
     def fill_cylinder(self, gridmap: np.ndarray, center_x: float, center_y: float,
                       radius: float) -> None:
@@ -190,17 +190,18 @@ class RealGridmapGenerator:
         
         # Iterate over bounding box and fill cells inside the circle
         step = self.resolution / 2
-        x = min_x
-        while x <= max_x:
-            y = min_y
-            while y <= max_y:
+        
+        # Use numpy linspace to avoid floating point precision issues
+        num_x_steps = max(1, int((max_x - min_x) / step) + 1)
+        num_y_steps = max(1, int((max_y - min_y) / step) + 1)
+        
+        for x in np.linspace(min_x, max_x, num_x_steps):
+            for y in np.linspace(min_y, max_y, num_y_steps):
                 dist = math.sqrt((x - center_x)**2 + (y - center_y)**2)
                 if dist <= radius:
                     gx, gy = self.world_to_grid(x, y)
                     if 0 <= gx < self.width and 0 <= gy < self.height:
                         gridmap[gy, gx] = 100  # Occupied
-                y += step
-            x += step
     
     def parse_world_file(self, world_file: str) -> np.ndarray:
         """

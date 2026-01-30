@@ -94,6 +94,8 @@ class LidarGridmapGenerator(Node):
         # Scanning state
         self.is_scanning = False
         self.scan_count = 0
+        # Lock for thread-safe gridmap updates when using multi-threaded executors
+        # or when service calls modify state during scan callbacks
         self.lock = threading.Lock()
         
         # Create subscriber to lidar scan

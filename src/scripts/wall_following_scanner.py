@@ -32,6 +32,7 @@ from std_srvs.srv import Trigger
 from nav_msgs.msg import Odometry
 import math
 import time
+import json
 from enum import Enum
 from typing import Optional, Dict
 
@@ -65,6 +66,7 @@ class WallFollowingScanner(Node):
         self.declare_parameter('side_cone_angle', 45.0)  # degrees
         self.declare_parameter('auto_start', True)  # Start automatically
         self.declare_parameter('auto_save', True)  # Save gridmap when done
+        self.declare_parameter('wall_follow_kp', 1.5)  # Proportional gain for wall following
         
         # Get parameters
         self.wall_distance = self.get_parameter('wall_distance').value
@@ -75,6 +77,7 @@ class WallFollowingScanner(Node):
         self.side_cone_angle = math.radians(self.get_parameter('side_cone_angle').value)
         self.auto_start = self.get_parameter('auto_start').value
         self.auto_save = self.get_parameter('auto_save').value
+        self.wall_follow_kp = self.get_parameter('wall_follow_kp').value
         
         # State machine
         self.state = WallFollowerState.IDLE
@@ -155,6 +158,9 @@ class WallFollowingScanner(Node):
         # Status timer
         self.status_timer = self.create_timer(1.0, self.publish_status)
         
+        # Auto-start timer (will be set if auto_start is True)
+        self.auto_start_timer = None
+        
         self.get_logger().info('Wall Following Scanner initialized')
         self.get_logger().info(f'Wall distance: {self.wall_distance}m')
         self.get_logger().info(f'Laps to complete: {self.laps}')
@@ -162,7 +168,7 @@ class WallFollowingScanner(Node):
         
         if self.auto_start:
             # Give time for other nodes to start
-            self.create_timer(2.0, self.auto_start_callback, callback_group=None)
+            self.auto_start_timer = self.create_timer(2.0, self.auto_start_callback)
     
     def auto_start_callback(self):
         """Automatically start wall following after a delay."""
@@ -170,7 +176,9 @@ class WallFollowingScanner(Node):
             self.get_logger().info('Auto-starting wall following...')
             self.start_wall_following()
         # Cancel the timer after first execution
-        self.destroy_timer(self._timers[-1])
+        if self.auto_start_timer is not None:
+            self.destroy_timer(self.auto_start_timer)
+            self.auto_start_timer = None
     
     def odom_callback(self, msg: Odometry):
         """Callback for odometry to track robot position."""
@@ -285,8 +293,7 @@ class WallFollowingScanner(Node):
         error = self.right_distance - self.wall_distance
         
         # Proportional control for angular velocity
-        kp = 1.5
-        vel.angular.z = -kp * error
+        vel.angular.z = -self.wall_follow_kp * error
         
         # Limit angular velocity
         vel.angular.z = max(-self.angular_speed, min(self.angular_speed, vel.angular.z))
@@ -430,7 +437,6 @@ class WallFollowingScanner(Node):
             }
         }
         
-        import json
         msg = String()
         msg.data = json.dumps(status)
         self.status_pub.publish(msg)
