@@ -116,10 +116,14 @@ ros2 run gazebo_differential_drive_robot navigation_examples.py
 
 For detailed information about reactive navigation, see [REACTIVE_NAVIGATION.md](../REACTIVE_NAVIGATION.md).
 
-To launch the robot in a specified world with a custom initial pose, run the `robot.launch.py` file and specify the world path and robot pose arguments.
+To launch the robot in a specified world with a custom initial pose, run the `robot.launch.py` file and specify the world and robot pose arguments.
 
 
-- **world**: Path to the world file 
+- **world**: World to load. Supports several formats:
+  - **By number**: `1` through `10` (e.g., `world:=1` for empty, `world:=5` for corridor)
+  - **By name**: `empty`, `boxes`, `cylinders`, `mixed`, `corridor`, `scattered`, `zigzag`, `corners`, `slalom`, `challenge`
+  - **By filename**: `world_01_empty.sdf` or `world_01_empty`
+  - **By full path**: `/path_to_world/world.sdf`
 - **x**: Initial x-coordinate of the robot
 - **y**: Initial y-coordinate of the robot
 - **z**: Initial z-coordinate of the robot
@@ -127,9 +131,37 @@ To launch the robot in a specified world with a custom initial pose, run the `ro
 - **P**: Initial pitch orientation
 - **Y**: Initial yaw orientation
 
-In the following example, the robot starts at position (x, y, z) = (1.0, 2.0, 0.5) with a yaw of 1.57 radians in the specified world:
+#### World Shortcuts
 
-```
+| Number | Name       | Description                    |
+|--------|------------|--------------------------------|
+| 1      | empty      | Empty world                    |
+| 2      | boxes      | World with box obstacles       |
+| 3      | cylinders  | World with cylinder obstacles  |
+| 4      | mixed      | Mixed obstacles                |
+| 5      | corridor   | Corridor environment           |
+| 6      | scattered  | Scattered obstacles            |
+| 7      | zigzag     | Zigzag path                    |
+| 8      | corners    | Corner obstacles               |
+| 9      | slalom     | Slalom course                  |
+| 10     | challenge  | Challenge course               |
+
+Examples:
+
+```bash
+# Using number shortcut
+ros2 launch gazebo_differential_drive_robot robot.launch.py world:=5
+
+# Using name shortcut
+ros2 launch gazebo_differential_drive_robot robot.launch.py world:=corridor
+
+# Using filename
+ros2 launch gazebo_differential_drive_robot robot.launch.py world:=world_05_corridor
+
+# With custom initial pose
+ros2 launch gazebo_differential_drive_robot robot.launch.py world:=boxes x:=1.0 y:=2.0 z:=0.5 Y:=1.57
+
+# Using full path (still supported)
 ros2 launch gazebo_differential_drive_robot robot.launch.py world:=/path_to_world/world.sdf x:=1.0 y:=2.0 z:=0.5 R:=0.0 P:=0.0 Y:=1.57
 ```
 
