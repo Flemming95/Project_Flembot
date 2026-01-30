@@ -204,6 +204,63 @@ src/
     └── lidar_object_detector.py # Object detection node
 ```
 
+## Navigation Support
+
+The lidar sensor is well-suited for object detection-based navigation. The package now includes additional nodes for navigation support:
+
+### Navigation Components
+
+1. **Lidar Navigation Support Node** (`lidar_navigation_support.py`)
+   - Analyzes lidar scans and provides zone-based obstacle detection
+   - Publishes sector distances and obstacle zones
+   - Provides safe direction recommendations
+   - Publishes recommended velocities (for reference)
+
+2. **Scan to Image Node** (`scan_to_image.py`)
+   - Converts lidar scans to image maps
+   - Publishes images for visualization
+   - Optionally saves images to files
+
+3. **RViz Configuration** (`robot_navigation.rviz`)
+   - Pre-configured to display robot, lidar scans, detected objects, and odometry
+   - Ready for tracking robot movement
+
+### Navigation Topics
+
+| Topic | Type | Description |
+|-------|------|-------------|
+| `/navigation/sector_distances` | `std_msgs/msg/Float32MultiArray` | Minimum distance in each angular sector |
+| `/navigation/obstacle_zones` | `std_msgs/msg/String` | JSON with obstacle status for each zone |
+| `/navigation/safe_direction` | `std_msgs/msg/Float32MultiArray` | Recommended safe direction (angle, confidence) |
+| `/navigation/recommended_velocity` | `geometry_msgs/msg/Twist` | Conservative velocity recommendation |
+| `/navigation/markers` | `visualization_msgs/msg/MarkerArray` | Visual markers for navigation data |
+| `/scan_image` | `sensor_msgs/msg/Image` | Visual image of the lidar scan |
+
+### Sending Velocity Commands
+
+Velocity commands can be sent via a separate publisher to the `/cmd_vel` topic:
+
+```bash
+# Using teleop_twist_keyboard
+ros2 run teleop_twist_keyboard teleop_twist_keyboard
+
+# Or publish directly
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.2}, angular: {z: 0.0}}"
+```
+
+### Launching with Full Navigation Support
+
+```bash
+ros2 launch gazebo_differential_drive_robot robot_navigation.launch.py
+```
+
+This will start:
+- Robot simulation in Gazebo
+- Lidar object detection
+- Navigation support node
+- Scan-to-image converter
+- RViz2 with pre-configured visualization
+
 ## Future Enhancements
 
 Potential improvements to the object detection system:

@@ -79,6 +79,22 @@ ros2 launch gazebo_differential_drive_robot robot_with_lidar.launch.py
 
 For detailed information about lidar object detection, see [LIDAR_DETECTION.md](../LIDAR_DETECTION.md).
 
+### Launch the Robot with Full Navigation Support
+
+To launch the robot with full navigation support (includes lidar detection, scan-to-image, navigation support, and RViz2):
+
+```bash
+source install/setup.bash
+ros2 launch gazebo_differential_drive_robot robot_navigation.launch.py
+```
+
+This launch file provides:
+- Object detection using lidar
+- Navigation zone analysis and safe direction recommendations
+- Scan-to-image map generation
+- Pre-configured RViz2 visualization
+- Ready for velocity commands via `/cmd_vel` topic
+
 To launch the robot in a specified world with a custom initial pose, run the `robot.launch.py` file and specify the world path and robot pose arguments.
 
 
