@@ -13,13 +13,17 @@ The NLP interface uses a hybrid approach:
 The NLP interface is a standalone Python module. It requires Python 3.8+ and has no external dependencies for basic local pattern matching.
 
 For LLM-based translation, you need an API key from one of the supported providers:
-- OpenAI (default)
+- **HuggingFace (default)** - Uses SmolLM3-3B, a small but capable model
+- OpenAI
 - Anthropic (Claude)
 - Azure OpenAI
 
 ### Setting up API Keys
 
 ```bash
+# For HuggingFace (default - recommended)
+export HF_ACCESS_TOKEN="your-huggingface-token"
+
 # For OpenAI
 export OPENAI_API_KEY="your-api-key-here"
 
@@ -41,7 +45,10 @@ from nlp_interface import NLPCommandTranslator
 # Create translator (local patterns only, no API needed)
 translator = NLPCommandTranslator(use_llm=False)
 
-# Or with LLM support
+# Or with LLM support (uses HuggingFace SmolLM3-3B by default)
+translator = NLPCommandTranslator(use_llm=True)
+
+# Or specify a different provider
 translator = NLPCommandTranslator(use_llm=True, llm_provider="openai")
 
 # Translate commands
@@ -60,7 +67,8 @@ print(method)   # Output: llm
 # Test local pattern matching
 python -m nlp_interface.translator
 
-# Test LLM translation (requires API key)
+# Test LLM translation with HuggingFace (requires HF_ACCESS_TOKEN)
+export HF_ACCESS_TOKEN="your-huggingface-token"
 python -m nlp_interface.llm_client
 ```
 

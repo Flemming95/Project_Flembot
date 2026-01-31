@@ -1,11 +1,15 @@
 {
-    "provider": "openai",
-    "model": "gpt-4o-mini",
-    "api_key_env_var": "OPENAI_API_KEY",
+    "provider": "huggingface",
+    "model": "HuggingFaceTB/SmolLM3-3B",
+    "api_key_env_var": "HF_ACCESS_TOKEN",
     "max_tokens": 150,
     "temperature": 0.1,
     "timeout_seconds": 30,
     "alternative_providers": {
+        "openai": {
+            "model": "gpt-4o-mini",
+            "api_key_env_var": "OPENAI_API_KEY"
+        },
         "anthropic": {
             "model": "claude-3-haiku-20240307",
             "api_key_env_var": "ANTHROPIC_API_KEY"

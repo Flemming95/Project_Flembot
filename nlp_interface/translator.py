@@ -115,7 +115,7 @@ class NLPCommandTranslator:
     def __init__(
         self,
         use_llm: bool = True,
-        llm_provider: str = "openai",
+        llm_provider: str = "huggingface",
         llm_model: Optional[str] = None,
         api_key: Optional[str] = None,
     ):
@@ -124,7 +124,7 @@ class NLPCommandTranslator:
         
         Args:
             use_llm: Whether to use LLM for complex translations
-            llm_provider: The LLM provider to use
+            llm_provider: The LLM provider to use (default: huggingface)
             llm_model: The model name (optional)
             api_key: API key for the LLM provider (optional)
         """

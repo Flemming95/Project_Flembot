@@ -64,7 +64,7 @@ Rules:
 
     def __init__(
         self,
-        provider: str = "openai",
+        provider: str = "huggingface",
         model: Optional[str] = None,
         api_key: Optional[str] = None,
         config_path: Optional[str] = None,
@@ -73,27 +73,35 @@ Rules:
         Initialize the LLM client.
         
         Args:
-            provider: LLM provider name ('openai', 'anthropic', 'azure_openai')
+            provider: LLM provider name ('huggingface', 'openai', 'anthropic', 'azure_openai')
             model: Model name (optional, uses config default)
-            api_key: API key (optional, reads from environment)
+            api_key: API key (optional, reads from environment or config)
             config_path: Path to config file (optional)
         """
         # Load configuration
         self.config = self._load_config(config_path)
         
         # Set provider and model
-        self.provider = provider or self.config.get("provider", "openai")
+        self.provider = provider or self.config.get("provider", "huggingface")
         
         if self.provider in self.config.get("alternative_providers", {}):
             provider_config = self.config["alternative_providers"][self.provider]
             default_model = provider_config.get("model")
             api_key_env = provider_config.get("api_key_env_var")
         else:
-            default_model = self.config.get("model", "gpt-4o-mini")
-            api_key_env = self.config.get("api_key_env_var", "OPENAI_API_KEY")
+            default_model = self.config.get("model", "HuggingFaceTB/SmolLM3-3B")
+            api_key_env = self.config.get("api_key_env_var", "HF_ACCESS_TOKEN")
         
         self.model = model or default_model
-        self.api_key = api_key or os.environ.get(api_key_env, "")
+        
+        # Try to get API key from: 1) parameter, 2) environment, 3) config file
+        if api_key:
+            self.api_key = api_key
+        else:
+            self.api_key = os.environ.get(api_key_env, "")
+            if not self.api_key:
+                # Fall back to api_key in config (for convenience)
+                self.api_key = self.config.get("api_key", "")
         
         # Get other settings
         self.max_tokens = self.config.get("max_tokens", 150)
@@ -131,12 +139,35 @@ Rules:
                 f"or pass the api_key parameter."
             )
         
-        if self.provider == "openai" or self.provider == "azure_openai":
+        if self.provider == "huggingface":
+            return self._translate_huggingface(natural_language_input)
+        elif self.provider == "openai" or self.provider == "azure_openai":
             return self._translate_openai(natural_language_input)
         elif self.provider == "anthropic":
             return self._translate_anthropic(natural_language_input)
         else:
             raise ValueError(f"Unsupported provider: {self.provider}")
+    
+    def _translate_huggingface(self, user_input: str) -> str:
+        """Translate using HuggingFace Inference API."""
+        # Use the serverless inference API
+        url = f"https://router.huggingface.co/hf-inference/models/{self.model}/v1/chat/completions"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}",
+        }
+        
+        payload = {
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": self.SYSTEM_PROMPT},
+                {"role": "user", "content": user_input},
+            ],
+            "max_tokens": self.max_tokens,
+            "temperature": self.temperature,
+        }
+        
+        return self._make_request(url, headers, payload, "openai")
     
     def _translate_openai(self, user_input: str) -> str:
         """Translate using OpenAI API."""
@@ -219,17 +250,19 @@ def main():
     """Demo function to test the LLM client."""
     import sys
     
-    # Check if API key is available
-    api_key = os.environ.get("OPENAI_API_KEY", "")
+    # Check if API key is available (HuggingFace is now the default)
+    api_key = os.environ.get("HF_ACCESS_TOKEN", "")
     if not api_key:
-        print("Warning: OPENAI_API_KEY environment variable not set.")
+        print("Warning: HF_ACCESS_TOKEN environment variable not set.")
         print("Please set it to use the LLM translation feature.")
         print("\nExample usage with API key:")
-        print('  export OPENAI_API_KEY="your-api-key"')
+        print('  export HF_ACCESS_TOKEN="your-huggingface-token"')
         print("  python -m nlp_interface.llm_client")
         return
     
     client = LLMClient()
+    print(f"Using provider: {client.provider}")
+    print(f"Using model: {client.model}")
     
     test_inputs = [
         "move forward two meters",
@@ -239,7 +272,7 @@ def main():
         "move forward until you reach a wall then turn around",
     ]
     
-    print("LLM Client Demo")
+    print("\nLLM Client Demo")
     print("=" * 50)
     
     for user_input in test_inputs:

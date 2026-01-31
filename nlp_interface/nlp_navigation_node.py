@@ -60,7 +60,7 @@ class NLPNavigationNode:
         
         # Declare parameters
         self._node.declare_parameter("use_llm", True)
-        self._node.declare_parameter("llm_provider", "openai")
+        self._node.declare_parameter("llm_provider", "huggingface")
         self._node.declare_parameter("llm_model", "")
         
         # Get parameters
