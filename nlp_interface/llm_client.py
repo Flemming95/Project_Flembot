@@ -94,14 +94,12 @@ Rules:
         
         self.model = model or default_model
         
-        # Try to get API key from: 1) parameter, 2) environment, 3) config file
+        # Try to get API key from: 1) parameter, 2) environment variable
+        # Note: API keys should NEVER be stored in config files as they may be committed to version control
         if api_key:
             self.api_key = api_key
         else:
             self.api_key = os.environ.get(api_key_env, "")
-            if not self.api_key:
-                # Fall back to api_key in config (for convenience)
-                self.api_key = self.config.get("api_key", "")
         
         # Get other settings
         self.max_tokens = self.config.get("max_tokens", 150)
@@ -149,9 +147,9 @@ Rules:
             raise ValueError(f"Unsupported provider: {self.provider}")
     
     def _translate_huggingface(self, user_input: str) -> str:
-        """Translate using HuggingFace Inference API."""
-        # Use the serverless inference API
-        url = f"https://router.huggingface.co/hf-inference/models/{self.model}/v1/chat/completions"
+        """Translate using HuggingFace Inference API (OpenAI-compatible endpoint)."""
+        # Use the HuggingFace serverless inference API with OpenAI-compatible chat format
+        url = f"https://api-inference.huggingface.co/models/{self.model}/v1/chat/completions"
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}",
@@ -167,7 +165,7 @@ Rules:
             "temperature": self.temperature,
         }
         
-        return self._make_request(url, headers, payload, "openai")
+        return self._make_request(url, headers, payload, "openai_compatible")
     
     def _translate_openai(self, user_input: str) -> str:
         """Translate using OpenAI API."""
@@ -195,7 +193,7 @@ Rules:
             "temperature": self.temperature,
         }
         
-        return self._make_request(url, headers, payload, "openai")
+        return self._make_request(url, headers, payload, "openai_compatible")
     
     def _translate_anthropic(self, user_input: str) -> str:
         """Translate using Anthropic API."""
@@ -218,9 +216,17 @@ Rules:
         return self._make_request(url, headers, payload, "anthropic")
     
     def _make_request(
-        self, url: str, headers: dict, payload: dict, response_format: str
+        self, url: str, headers: dict, payload: dict, response_schema: str
     ) -> str:
-        """Make HTTP request to LLM API."""
+        """
+        Make HTTP request to LLM API.
+        
+        Args:
+            url: The API endpoint URL
+            headers: HTTP headers
+            payload: Request payload
+            response_schema: The response format schema ('openai_compatible' or 'anthropic')
+        """
         data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(url, data=data, headers=headers, method="POST")
         
@@ -228,12 +234,12 @@ Rules:
             with urllib.request.urlopen(req, timeout=self.timeout) as response:
                 response_data = json.loads(response.read().decode("utf-8"))
                 
-                if response_format == "openai":
+                if response_schema == "openai_compatible":
                     return response_data["choices"][0]["message"]["content"].strip()
-                elif response_format == "anthropic":
+                elif response_schema == "anthropic":
                     return response_data["content"][0]["text"].strip()
                 else:
-                    raise ValueError(f"Unknown response format: {response_format}")
+                    raise ValueError(f"Unknown response schema: {response_schema}")
                     
         except urllib.error.HTTPError as e:
             error_body = e.read().decode("utf-8") if e.fp else ""
