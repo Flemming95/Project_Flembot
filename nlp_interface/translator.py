@@ -6,9 +6,13 @@ robot commands to the native command format. It combines local pattern matching
 for common commands with LLM-based translation for complex inputs.
 """
 
+import logging
 import re
 from typing import Optional, Tuple
 from .llm_client import LLMClient
+
+# Configure module logger
+logger = logging.getLogger(__name__)
 
 
 class NLPCommandTranslator:
@@ -134,8 +138,11 @@ class NLPCommandTranslator:
                     model=llm_model,
                     api_key=api_key,
                 )
-            except Exception:
+            except Exception as e:
                 # LLM client initialization failed, will use local only
+                logger.warning(
+                    f"LLM client initialization failed, using local patterns only: {e}"
+                )
                 self.llm_client = None
     
     def translate(self, natural_language_input: str) -> Tuple[str, str]:
@@ -163,8 +170,8 @@ class NLPCommandTranslator:
                 # Validate the LLM result
                 if self._validate_command(llm_result):
                     return llm_result, "llm"
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(f"LLM translation failed: {e}")
         
         # If all else fails, return stop as safe fallback
         return "stop", "fallback"
