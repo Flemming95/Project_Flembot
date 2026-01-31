@@ -148,8 +148,8 @@ Rules:
     
     def _translate_huggingface(self, user_input: str) -> str:
         """Translate using HuggingFace Inference API (OpenAI-compatible endpoint)."""
-        # Use the HuggingFace serverless inference API with OpenAI-compatible chat format
-        url = f"https://api-inference.huggingface.co/models/{self.model}/v1/chat/completions"
+        # Use the HuggingFace router API with OpenAI-compatible chat format
+        url = f"https://router.huggingface.co/hf-inference/models/{self.model}/v1/chat/completions"
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}",
