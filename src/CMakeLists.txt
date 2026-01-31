@@ -1,0 +1,46 @@
+cmake_minimum_required(VERSION 3.8)
+project(gazebo_differential_drive_robot)
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+# find dependencies
+find_package(ament_cmake REQUIRED)
+# uncomment the following section in order to fill in
+# further dependencies manually.
+# find_package(<dependency> REQUIRED)
+
+install(
+  DIRECTORY launch model config worlds gridmaps
+  DESTINATION share/${PROJECT_NAME}
+)
+
+install(
+  PROGRAMS
+    scripts/lidar_object_detector.py
+    scripts/simple_lidar_reader.py
+    scripts/scan_to_image.py
+    scripts/lidar_navigation_support.py
+    scripts/reactive_navigation_controller.py
+    scripts/navigation_examples.py
+    scripts/real_gridmap_generator.py
+    scripts/lidar_gridmap_generator.py
+    scripts/gridmap_comparator.py
+    scripts/wall_following_scanner.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  # the following line skips the linter which checks for copyrights
+  # comment the line when a copyright and license is added to all source files
+  set(ament_cmake_copyright_FOUND TRUE)
+  # the following line skips cpplint (only works in a git repo)
+  # comment the line when this package is in a git repo and when
+  # a copyright and license is added to all source files
+  set(ament_cmake_cpplint_FOUND TRUE)
+  ament_lint_auto_find_test_dependencies()
+endif()
+
+ament_package()
