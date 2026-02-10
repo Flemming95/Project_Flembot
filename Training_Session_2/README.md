@@ -375,13 +375,15 @@ This exercise uses a database with the following relations:
 
 **Solution:**
 ```
+π<sub>name</sub>(Ships) ∪ ρ<sub>name/ship</sub>(π<sub>ship</sub>(Outcomes))
+```
+
+**Alternative solution (without explicit renaming):**
+```
 π<sub>name</sub>(Ships) ∪ π<sub>ship</sub>(Outcomes)
 ```
 
-**Alternative solution with renaming for consistency:**
-```
-π<sub>name</sub>(Ships) ∪ ρ<sub>name/ship</sub>(π<sub>ship</sub>(Outcomes))
-```
+*Note: The primary solution uses renaming (ρ) to ensure consistent attribute names in the union result.*
 
 **Result on sample data:**
 | name |
