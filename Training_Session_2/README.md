@@ -210,6 +210,8 @@ This exercise uses a database with the following relations:
 - **Battles**(name, date)
 - **Outcomes**(ship, battle, result)
 
+**Important Note:** Unlike the previous exercises, this dataset contains "dangling tuples" - ships mentioned in Outcomes that do not appear in Ships. For example, Bismarck, Hood, Duke of York, Fuso, Prince of Wales, Rodney, Scharnhorst, South Dakota, West Virginia, and Yamashiro appear in Outcomes but not in Ships. This is a realistic scenario where not all ships in battle records have complete ship details.
+
 ### Sample Data
 
 **Classes:**
