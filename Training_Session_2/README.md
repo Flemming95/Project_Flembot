@@ -366,10 +366,9 @@ This exercise uses a database with the following relations:
 | ship | displacement | numGuns |
 |------|--------------|---------|
 | Kirishima | 32000 | 8 |
-| South Dakota | (not in Ships) | (not in Ships) |
 | Washington | 37000 | 9 |
 
-*Note: South Dakota appears in Outcomes but not in Ships, so it cannot be joined with Classes to get displacement and numGuns.*
+*Note: South Dakota appears in Outcomes for the Guadalcanal battle but does not appear in the Ships relation. Therefore, it cannot be joined with Classes and is not included in the result. Only ships that exist in the Ships relation can have their displacement and numGuns retrieved.*
 
 #### f) List all the capital ships mentioned in the database. (Remember that all these ships may not appear in the Ships relation.)
 
