@@ -350,20 +350,20 @@ This exercise uses a database with the following relations:
 
 **Solution:**
 ```
-π<sub>ship,displacement,numGuns</sub>(σ<sub>battle='Guadalcanal'</sub>(Outcomes) ⨝<sub>ship=name</sub> (Ships ⨝<sub>Ships.class=Classes.class</sub> Classes))
+π<sub>name,displacement,numGuns</sub>(σ<sub>battle='Guadalcanal'</sub>(Outcomes) ⨝<sub>ship=name</sub> (Ships ⨝<sub>Ships.class=Classes.class</sub> Classes))
 ```
 
-**Alternative solution handling ships not in Ships relation:**
+**Alternative solution with explicit renaming:**
 ```
-π<sub>name,displacement,numGuns</sub>(
-  (ρ<sub>name/ship</sub>(σ<sub>battle='Guadalcanal'</sub>(π<sub>ship</sub>(Outcomes))) 
+π<sub>ship,displacement,numGuns</sub>(
+  ρ<sub>ship/name</sub>((ρ<sub>name/ship</sub>(σ<sub>battle='Guadalcanal'</sub>(π<sub>ship</sub>(Outcomes))) 
    ⨝<sub>name=Ships.name</sub> Ships) 
-  ⨝<sub>Ships.class=Classes.class</sub> Classes
+  ⨝<sub>Ships.class=Classes.class</sub> Classes)
 )
 ```
 
 **Result on sample data:**
-| ship | displacement | numGuns |
+| name | displacement | numGuns |
 |------|--------------|---------|
 | Kirishima | 32000 | 8 |
 | Washington | 37000 | 9 |
@@ -382,7 +382,7 @@ This exercise uses a database with the following relations:
 π<sub>name</sub>(Ships) ∪ π<sub>ship</sub>(Outcomes)
 ```
 
-*Note: The primary solution uses renaming (ρ) to ensure consistent attribute names in the union result.*
+*Note: The primary solution uses renaming (ρ) to ensure consistent attribute names in the union result. While relational algebra may allow unions of relations with different attribute names when domains are compatible, using consistent naming is clearer and follows better practice.*
 
 **Result on sample data:**
 | name |
